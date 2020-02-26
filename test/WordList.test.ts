@@ -2,8 +2,7 @@ import { expect } from "chai";
 import randomString from "random-string";
 import { WordList } from "../src/WordList";
 
-let i = 0;
-describe("calculate", function() {
+describe("WordList", function() {
   const getRandomString = () => randomString({ letters: true, numbers: true });
 
   it("empty array, empty list", () => {
