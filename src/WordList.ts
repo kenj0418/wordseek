@@ -10,7 +10,7 @@ const cleanWordsArray = (words: Array<string>): Array<string> => {
 };
 
 export class WordList {
-  words: Array<string>;
+  readonly words: Array<string>;
 
   constructor(words: Array<string>) {
     this.words = cleanWordsArray(words);

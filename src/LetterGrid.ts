@@ -32,9 +32,9 @@ const getMaxWidth = (letters: Array<string>): number => {
 };
 
 export class LetterGrid {
-  gridWidth: number;
-  gridHeight: number;
-  letters: Array<string>;
+  readonly gridWidth: number;
+  readonly gridHeight: number;
+  readonly letters: Array<string>;
 
   constructor(letters?: Array<string>) {
     this.gridHeight = letters ? letters.length : 0;
@@ -96,5 +96,32 @@ export class LetterGrid {
     }
 
     return currGrid;
+  }
+
+  checkPosition(x: number, y: number): void {
+    if (x >= this.getWidth() || y >= this.getHeight()) {
+      throw new Error(
+        `Out of range position (${x},${y}) in ${this.getWidth() +
+          1}x${this.getHeight() + 1} grid`
+      );
+    }
+  }
+
+  get(x: number, y: number): string {
+    this.checkPosition(x, y);
+    return this.letters[y][x];
+  }
+
+  set(x: number, y: number, ch: string): LetterGrid {
+    this.checkPosition(x, y);
+
+    const setInString = (st: string, index: number, ch: string): string => {
+      return st.slice(0, index) + ch + st.slice(index + 1);
+    };
+
+    const newLetters = this.letters.map((row, index) =>
+      index == y ? setInString(row, index, ch) : row
+    );
+    return new LetterGrid(newLetters);
   }
 }

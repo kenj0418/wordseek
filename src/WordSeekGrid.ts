@@ -19,8 +19,8 @@ import { WordList } from "./WordList";
 // }
 
 export class WordSeekGrid {
-  words: WordList;
-  grid: Array<string>;
+  readonly words: WordList;
+  readonly grid: Array<string>;
 
   constructor(wordList: WordList, forceWidth?: number, forceHeight?: number) {
     this.grid = new Array<string>(0);

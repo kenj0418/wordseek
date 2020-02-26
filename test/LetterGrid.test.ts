@@ -2,7 +2,7 @@ import { expect } from "chai";
 import randomString from "random-string";
 import { LetterGrid } from "../src/LetterGrid";
 
-describe.only("LetterGrid", function() {
+describe("LetterGrid", function() {
   it("empty grid", () => {
     const grid = new LetterGrid();
     expect(grid.getWidth()).to.equal(0);
@@ -39,7 +39,7 @@ describe.only("LetterGrid", function() {
   });
 
   it("2x2 can expand down", function() {
-    this.retries(10); //since by random chance it could expand up
+    this.retries(10); //since by random chance, it could expand up
     const grid = new LetterGrid(["AB"]).expandSize(2, 2);
     expect(grid.getWidth()).to.equal(2);
     expect(grid.getHeight()).to.equal(2);
@@ -47,7 +47,7 @@ describe.only("LetterGrid", function() {
   });
 
   it("2x2 can expand up", function() {
-    this.retries(10); //since by random chance it could expand up
+    this.retries(10); //since by random chance, it could expand down
     const grid = new LetterGrid(["AB"]).expandSize(2, 2);
     expect(grid.getWidth()).to.equal(2);
     expect(grid.getHeight()).to.equal(2);
@@ -55,7 +55,7 @@ describe.only("LetterGrid", function() {
   });
 
   it("2x2 can expand right", function() {
-    this.retries(10); //since by random chance it could expand up
+    this.retries(10); //since by random chance, it could expand left
     const grid = new LetterGrid(["A", "B"]).expandSize(2, 2);
     expect(grid.getWidth()).to.equal(2);
     expect(grid.getHeight()).to.equal(2);
@@ -63,7 +63,7 @@ describe.only("LetterGrid", function() {
   });
 
   it("2x2 can expand left", function() {
-    this.retries(10); //since by random chance it could expand up
+    this.retries(10); //since by random chance, it could expand right
     const grid = new LetterGrid(["A", "B"]).expandSize(2, 2);
     expect(grid.getWidth()).to.equal(2);
     expect(grid.getHeight()).to.equal(2);
@@ -80,5 +80,52 @@ describe.only("LetterGrid", function() {
     expect(letters[1]).to.equal("C?");
   });
 
-  xit("need more tests");
+  it("get value at location", () => {
+    const grid = new LetterGrid(["AB", "CD"]);
+    expect(grid.get(0, 0)).to.equal("A");
+    expect(grid.get(1, 0)).to.equal("B");
+    expect(grid.get(0, 1)).to.equal("C");
+    expect(grid.get(1, 1)).to.equal("D");
+  });
+
+  it("get out-of-bounds value throws", () => {
+    const grid = new LetterGrid(["AB", "CD"]);
+    let exceptionReceived;
+    try {
+      grid.get(9, 9);
+    } catch (ex) {
+      exceptionReceived = ex;
+    }
+    expect(exceptionReceived).to.exist;
+  });
+
+  it("set value at location, new grid has value, old grid unchanged", () => {
+    const grid = new LetterGrid(["AB", "CD"]);
+    const newGrid = grid.set(1, 1, "E");
+
+    expect(grid.getWidth()).to.equal(2);
+    expect(grid.getHeight()).to.equal(2);
+    expect(grid.get(0, 0)).to.equal("A");
+    expect(grid.get(1, 0)).to.equal("B");
+    expect(grid.get(0, 1)).to.equal("C");
+    expect(grid.get(1, 1)).to.equal("D");
+
+    expect(newGrid.getWidth()).to.equal(2);
+    expect(newGrid.getHeight()).to.equal(2);
+    expect(newGrid.get(0, 0)).to.equal("A");
+    expect(newGrid.get(1, 0)).to.equal("B");
+    expect(newGrid.get(0, 1)).to.equal("C");
+    expect(newGrid.get(1, 1)).to.equal("E");
+  });
+
+  it("set value out of range throws", () => {
+    const grid = new LetterGrid(["AB", "CD"]);
+    let exceptionReceived;
+    try {
+      grid.set(9, 9, "E");
+    } catch (ex) {
+      exceptionReceived = ex;
+    }
+    expect(exceptionReceived).to.exist;
+  });
 });
