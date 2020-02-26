@@ -1,13 +1,11 @@
 import { expect } from "chai";
+import randomString from "random-string";
 import { WordList } from "../src/WordList";
 
 let i = 0;
-const randomString = (): string => {
-  //todo find a library for this and figure out how to use it with ts
-  return "THISISRANDOM" + i++;
-};
-
 describe("calculate", function() {
+  const getRandomString = () => randomString({ letters: true, numbers: true });
+
   it("empty array, empty list", () => {
     const wl = new WordList([]);
     expect(wl.getAllWords()).to.deep.equal([]);
@@ -19,13 +17,13 @@ describe("calculate", function() {
   });
 
   it("single word list is in list", () => {
-    const testWord = randomString();
+    const testWord = getRandomString();
     const wl = new WordList([testWord]);
     expect(wl.getAllWords()).to.deep.equal([testWord]);
   });
 
   it("single word list removed from list", () => {
-    const testWord = randomString();
+    const testWord = getRandomString();
     const wl = new WordList([testWord]);
     expect(wl.getRandomWord()).to.equal(testWord);
     const remainingWl = wl.getRemainingWordList(testWord);
@@ -33,9 +31,9 @@ describe("calculate", function() {
   });
 
   it("multiple words in list", () => {
-    const testWord1 = randomString();
-    const testWord2 = randomString();
-    const testWord3 = randomString();
+    const testWord1 = getRandomString();
+    const testWord2 = getRandomString();
+    const testWord3 = getRandomString();
     const inputArray = [testWord1, testWord2, testWord3];
     const wl = new WordList(inputArray);
     const randomWord = wl.getRandomWord();
@@ -49,8 +47,8 @@ describe("calculate", function() {
   });
 
   it("duplicate words in list removed", () => {
-    const testWord1 = randomString();
-    const testWord2 = randomString();
+    const testWord1 = getRandomString();
+    const testWord2 = getRandomString();
     const inputArray = [testWord1, testWord2, testWord1];
     const wl = new WordList(inputArray);
     const randomWord = wl.getRandomWord();
@@ -63,13 +61,13 @@ describe("calculate", function() {
   });
 
   it("non alpha-numeric removed from words", () => {
-    const testWord1A = randomString();
-    const testWord1B = randomString();
+    const testWord1A = getRandomString();
+    const testWord1B = getRandomString();
     const cleanWord1 = testWord1A + testWord1B;
-    const testWord2 = randomString();
-    const testWord3A = randomString();
-    const testWord3B = randomString();
-    const testWord3C = randomString();
+    const testWord2 = getRandomString();
+    const testWord3A = getRandomString();
+    const testWord3B = getRandomString();
+    const testWord3C = getRandomString();
     const cleanWord3 = testWord3A + testWord3B + testWord3C;
     const inputArray = [
       testWord1A + " " + testWord1B,
@@ -97,11 +95,11 @@ describe("calculate", function() {
     this.retries(5); //since by random chance it could be the same
 
     const inputArray = [
-      randomString(),
-      randomString(),
-      randomString(),
-      randomString(),
-      randomString()
+      getRandomString(),
+      getRandomString(),
+      getRandomString(),
+      getRandomString(),
+      getRandomString()
     ];
     const randomWord1 = new WordList(inputArray).getRandomWord();
     const randomWord2 = new WordList(inputArray).getRandomWord();
@@ -113,7 +111,11 @@ describe("calculate", function() {
   });
 
   it("randomly extracting all words from list", () => {
-    const inputArray = [randomString(), randomString(), randomString()];
+    const inputArray = [
+      getRandomString(),
+      getRandomString(),
+      getRandomString()
+    ];
 
     let wl = new WordList(inputArray);
     expect(wl.getAllWords().length).to.equal(3);
