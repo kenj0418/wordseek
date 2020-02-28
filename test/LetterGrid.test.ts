@@ -128,4 +128,90 @@ describe("LetterGrid", function() {
     }
     expect(exceptionReceived).to.exist;
   });
+
+  it("placeWordAt success with empty grid", () => {
+    const grid = new LetterGrid(["??", "??"]);
+
+    const eastGrid = grid.placeWordAt(0, 0, LetterGrid.EAST, "QW");
+    expect(eastGrid).to.exist;
+    expect(eastGrid!.getLetters()).to.deep.equal(["QW", "??"]);
+
+    const westGrid = grid.placeWordAt(1, 0, LetterGrid.WEST, "QW");
+    expect(westGrid).to.exist;
+    expect(westGrid!.getLetters()).to.deep.equal(["WQ", "??"]);
+
+    const southGrid = grid.placeWordAt(0, 0, LetterGrid.SOUTH, "QW");
+    expect(southGrid).to.exist;
+    expect(southGrid!.getLetters()).to.deep.equal(["Q?", "W?"]);
+
+    const northGrid = grid.placeWordAt(0, 1, LetterGrid.NORTH, "QW");
+    expect(northGrid).to.exist;
+    expect(northGrid!.getLetters()).to.deep.equal(["W?", "Q?"]);
+
+    const southEastGrid = grid.placeWordAt(0, 0, LetterGrid.SOUTHEAST, "QW");
+    expect(southEastGrid).to.exist;
+    expect(southEastGrid!.getLetters()).to.deep.equal(["Q?", "?W"]);
+
+    const southWestGrid = grid.placeWordAt(1, 0, LetterGrid.SOUTHWEST, "QW");
+    expect(southWestGrid).to.exist;
+    expect(southWestGrid!.getLetters()).to.deep.equal(["?Q", "W?"]);
+
+    const northEastGrid = grid.placeWordAt(0, 1, LetterGrid.NORTHEAST, "QW");
+    expect(northEastGrid).to.exist;
+    expect(northEastGrid!.getLetters()).to.deep.equal(["?W", "Q?"]);
+
+    const northWestGrid = grid.placeWordAt(1, 1, LetterGrid.NORTHWEST, "QW");
+    expect(northWestGrid).to.exist;
+    expect(northWestGrid!.getLetters()).to.deep.equal(["W?", "?Q"]);
+  });
+
+  it("placeWordAt success with overlap grid", () => {
+    const grid = new LetterGrid(["?B", "CD"]);
+
+    const eastGrid = grid.placeWordAt(0, 0, LetterGrid.EAST, "XB");
+    expect(eastGrid).to.exist;
+    expect(eastGrid!.getLetters()).to.deep.equal(["XB", "CD"]);
+
+    const northWestGrid = grid.placeWordAt(1, 1, LetterGrid.NORTHWEST, "DY");
+    expect(northWestGrid).to.exist;
+    expect(northWestGrid!.getLetters()).to.deep.equal(["YB", "CD"]);
+  });
+
+  it("placeWordAt success with overlap grid full grid", () => {
+    const grid = new LetterGrid(["AB", "CD"]);
+
+    const eastGrid = grid.placeWordAt(0, 0, LetterGrid.EAST, "AB");
+    expect(eastGrid).to.exist;
+    expect(eastGrid!.getLetters()).to.deep.equal(["AB", "CD"]);
+  });
+
+  it("placeWordAt fails with boundary top", () => {
+    const grid = new LetterGrid(["??", "??"]);
+    const northGrid = grid.placeWordAt(0, 1, LetterGrid.NORTH, "ABC");
+    expect(northGrid).to.not.exist;
+  });
+
+  it("placeWordAt fails with boundary bottom", () => {
+    const grid = new LetterGrid(["??", "??"]);
+    const southEastGrid = grid.placeWordAt(0, 1, LetterGrid.SOUTHEAST, "XB");
+    expect(southEastGrid).to.not.exist;
+  });
+
+  it("placeWordAt fails with boundary left", () => {
+    const grid = new LetterGrid(["??", "??"]);
+    const westGrid = grid.placeWordAt(0, 0, LetterGrid.WEST, "XB");
+    expect(westGrid).to.not.exist;
+  });
+
+  it("placeWordAt fails with boundary right", () => {
+    const grid = new LetterGrid(["??", "??"]);
+    const eastGrid = grid.placeWordAt(1, 0, LetterGrid.EAST, "XB");
+    expect(eastGrid).to.not.exist;
+  });
+
+  it("placeWordAt fails with collision", () => {
+    const grid = new LetterGrid(["A?", "??"]);
+    const eastGrid = grid.placeWordAt(0, 0, LetterGrid.EAST, "BQ");
+    expect(eastGrid).to.not.exist;
+  });
 });

@@ -7,8 +7,7 @@
     "start": "tsc; node index.js",
     "build": "tsc",
     "watch": "tsc -w",
-    "test": "mocha -r ts-node/register test/**/*.test.ts",
-    "watch-test": "npm run test -- --watchAll",
+    "test": "mocha -r ts-node/register test/**/*.test.ts --watch-extensions ts",
     "lint": "tsc --noEmit && eslint \"**/*.{js,ts}\" --quiet --fix"
   },
   "author": "",

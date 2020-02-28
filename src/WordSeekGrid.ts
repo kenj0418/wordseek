@@ -1,4 +1,5 @@
 import { WordList } from "./WordList";
+import { LetterGrid } from "./LetterGrid";
 
 // const placeWordInGrid = (
 //   currentGrid: Array<string>,
@@ -20,19 +21,31 @@ import { WordList } from "./WordList";
 
 export class WordSeekGrid {
   readonly words: WordList;
-  readonly grid: Array<string>;
+  readonly grid: LetterGrid;
 
   constructor(wordList: WordList, forceWidth?: number, forceHeight?: number) {
-    this.grid = new Array<string>(0);
+    const baseGrid = new LetterGrid();
+    this.grid =
+      forceWidth || forceHeight
+        ? baseGrid.expandSize(forceWidth || 0, forceHeight || 0)
+        : baseGrid;
     this.words = wordList;
   }
 
   getGridOutput(): string {
-    return this.grid.join(""); //todo \n
+    return this.grid.getLetters().join("\n");
   }
 
   getWordsOutput(): string {
-    return ""; //getWordsOutput NOT IMPLEMENTED
+    return this.words.getAllWords().join("\n");
+  }
+
+  getWidth(): number {
+    return this.grid.getWidth();
+  }
+
+  getHeight(): number {
+    return this.grid.getHeight();
   }
 
   // getOutput(): string {

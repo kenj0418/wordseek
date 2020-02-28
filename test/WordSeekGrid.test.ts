@@ -27,24 +27,51 @@ describe("WordSeekGrid", function() {
 
   it("no words, no output", () => {
     const wg = new WordSeekGrid(new WordList([]));
+    expect(wg.getWidth()).to.equal(0);
+    expect(wg.getHeight()).to.equal(0);
     expect(wg.getGridOutput()).to.equal("");
     expect(wg.getWordsOutput()).to.equal("");
   });
 
-  xit("no words, forced grid size, has output", () => {
+  it("no words, forced grid size, has output", () => {
     const wordList = new WordList([]);
     const gridWidth = 5;
     const gridHeight = 10;
+
     const wg = new WordSeekGrid(wordList, gridWidth, gridHeight);
-    const grid = wg.getGridOutput();
-    expect(grid.length).to.equal((gridWidth + "\n".length) * gridHeight);
-    expect(grid.split("\n").length).to.equal(gridHeight);
+    expect(wg.getWidth()).to.equal(gridWidth);
+    expect(wg.getHeight()).to.equal(gridHeight);
     expect(wg.getWordsOutput()).to.equal("");
+
+    const grid = wg.getGridOutput();
+    expect(grid.length).to.equal((gridWidth + "\n".length) * gridHeight - 1);
+    expect(grid.split("\n").length).to.equal(gridHeight);
   });
 
   xit("one word, is output", () => {
-    //
+    const testWord = randomString();
+    const wordList = new WordList([testWord]);
+    const wg = new WordSeekGrid(wordList);
+    expect(wg.getWordsOutput()).to.equal(testWord);
+
+    const grid = wg.getGridOutput();
+
+    if (wg.getWidth() == 1) {
+      //word placed vertically
+      expect(wg.getHeight()).to.equal(testWord.length);
+    } else if (wg.getHeight() == 1) {
+      expect(wg.getWidth()).to.equal(testWord.length);
+      //word placed horizontally
+    } else {
+      //word placed diag
+      expect(wg.getWidth()).to.equal(testWord.length);
+      expect(wg.getHeight()).to.equal(testWord.length);
+    }
+
+    expect(3).to.equal(4); //todo need to add a test to find the actual word
   });
+
+  //todo need to make solver/finder in order to make most of these tests
 
   xit("one word, forced grid size, is output", () => {
     //

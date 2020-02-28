@@ -31,7 +31,34 @@ const getMaxWidth = (letters: Array<string>): number => {
   return currMax;
 };
 
+export class GridDirection {
+  readonly x: number;
+  readonly y: number;
+
+  constructor(deltaX: number, deltaY: number) {
+    this.x = deltaX;
+    this.y = deltaY;
+  }
+
+  getX(): number {
+    return this.x;
+  }
+
+  getY(): number {
+    return this.y;
+  }
+}
+
 export class LetterGrid {
+  public static readonly EAST = new GridDirection(1, 0);
+  public static readonly WEST = new GridDirection(-1, 0);
+  public static readonly SOUTH = new GridDirection(0, 1);
+  public static readonly NORTH = new GridDirection(0, -1);
+  public static readonly SOUTHEAST = new GridDirection(1, 1);
+  public static readonly SOUTHWEST = new GridDirection(-1, 1);
+  public static readonly NORTHEAST = new GridDirection(1, -1);
+  public static readonly NORTHWEST = new GridDirection(-1, -1);
+
   readonly gridWidth: number;
   readonly gridHeight: number;
   readonly letters: Array<string>;
@@ -119,9 +146,47 @@ export class LetterGrid {
       return st.slice(0, index) + ch + st.slice(index + 1);
     };
 
-    const newLetters = this.letters.map((row, index) =>
-      index == y ? setInString(row, index, ch) : row
-    );
+    const newLetters = this.letters.map((row, index) => {
+      return index == y ? setInString(row, x, ch) : row;
+    });
     return new LetterGrid(newLetters);
+  }
+
+  placeWordAt(
+    x: number,
+    y: number,
+    direction: GridDirection,
+    word: string
+  ): LetterGrid | undefined {
+    let currX = x;
+    let currY = y;
+    let currGrid: LetterGrid = this;
+    let currIndex = 0;
+
+    while (currIndex < word.length) {
+      const outOfRange =
+        currX < 0 ||
+        currY < 0 ||
+        currX >= currGrid.getWidth() ||
+        currY >= currGrid.getHeight();
+      if (outOfRange) {
+        return undefined;
+      }
+
+      const currValue = currGrid.get(currX, currY);
+      const desiredValue = word[currIndex];
+
+      if (currValue == "?") {
+        currGrid = currGrid.set(currX, currY, word[currIndex]);
+      } else if (currValue != desiredValue) {
+        return undefined; // conflict, can't place
+      }
+
+      currIndex++;
+      currX += direction.getX();
+      currY += direction.getY();
+    }
+
+    return currGrid;
   }
 }
