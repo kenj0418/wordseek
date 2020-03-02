@@ -3,7 +3,8 @@ import { WordLocation } from "./WordLocation";
 import { WordSeekFinder } from "./WordSeekFinder";
 
 const lettersToChoose = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"; // change if want to allow numbers, exclude Q, Z, etc.
-const maxPlacementAttemptBeforeExpand = 20;
+const maxPlacementAttemptBeforeExpand = 1000;
+const expandChunkSize = 10; // number of row/col to expand by if expanding
 
 const randomNumber = (n: number): number => {
   return Math.floor(Math.random() * n);
@@ -85,6 +86,27 @@ export class LetterGrid {
     return new LetterGrid(newLetters);
   }
 
+  expandRandom(): LetterGrid {
+    const direction = randomNumber(4);
+
+    let currGrid: LetterGrid = this;
+
+    for (let i = 0; i < expandChunkSize; i++) {
+      switch (direction) {
+        case 0:
+          currGrid = currGrid.expandUp();
+        case 1:
+          currGrid = currGrid.expandDown();
+        case 2:
+          currGrid = currGrid.expandLeft();
+        default:
+          currGrid = currGrid.expandRight();
+      }
+    }
+
+    return currGrid;
+  }
+
   expandSize(newWidth: number, newHeight: number): LetterGrid {
     let currGrid: LetterGrid = this;
 
@@ -154,10 +176,10 @@ export class LetterGrid {
   }
 
   placeWordAt(
+    word: string,
     x: number,
     y: number,
-    direction: GridDirection,
-    word: string
+    direction: GridDirection
   ): LetterGrid | undefined {
     let currX = x;
     let currY = y;
@@ -191,6 +213,15 @@ export class LetterGrid {
     return currGrid;
   }
 
+  placeWord(word: string, placement: WordLocation): LetterGrid | undefined {
+    return this.placeWordAt(
+      word,
+      placement.getX(),
+      placement.getY(),
+      placement.getDirection()
+    );
+  }
+
   randomPlacementAttempt(word: string): WordLocation | undefined {
     const x = randomNumber(this.getWidth());
     const y = randomNumber(this.getHeight());
@@ -201,7 +232,7 @@ export class LetterGrid {
         GridDirection.ALL_DIRECTIONS[
           (i + directionOffset) % GridDirection.ALL_DIRECTIONS.length
         ];
-      if (this.placeWordAt(x, y, direction, word)) {
+      if (this.placeWordAt(word, x, y, direction)) {
         return new WordLocation(x, y, direction);
       }
     }
@@ -224,5 +255,23 @@ export class LetterGrid {
 
       return undefined;
     }
+  }
+
+  addWord(word: string): LetterGrid {
+    const maxExpand = word.length * 5; // so doesn't try for ever if things go wrong
+
+    let currGrid: LetterGrid = this;
+    for (let i = 0; i <= maxExpand; i++) {
+      const placement = currGrid.findRandomPlacement(word);
+      if (placement) {
+        return currGrid.placeWord(word, placement)!;
+      }
+
+      currGrid = currGrid.expandRandom();
+    }
+
+    throw new Error(
+      `Unable to place word even after expanding grid ${maxExpand} times.`
+    );
   }
 }
