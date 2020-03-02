@@ -1,4 +1,13 @@
-import * as fs from "fs";
+import { GridDirection } from "./GridDirection";
+import { WordLocation } from "./WordLocation";
+import { WordSeekFinder } from "./WordSeekFinder";
+
+const lettersToChoose = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"; // change if want to allow numbers, exclude Q, Z, etc.
+const maxPlacementAttemptBeforeExpand = 20;
+
+const randomNumber = (n: number): number => {
+  return Math.floor(Math.random() * n);
+};
 
 const normalizeStringWidth = (st: string, targetWidth: number): string => {
   let returnString = st;
@@ -31,34 +40,7 @@ const getMaxWidth = (letters: Array<string>): number => {
   return currMax;
 };
 
-export class GridDirection {
-  readonly x: number;
-  readonly y: number;
-
-  constructor(deltaX: number, deltaY: number) {
-    this.x = deltaX;
-    this.y = deltaY;
-  }
-
-  getX(): number {
-    return this.x;
-  }
-
-  getY(): number {
-    return this.y;
-  }
-}
-
 export class LetterGrid {
-  public static readonly EAST = new GridDirection(1, 0);
-  public static readonly WEST = new GridDirection(-1, 0);
-  public static readonly SOUTH = new GridDirection(0, 1);
-  public static readonly NORTH = new GridDirection(0, -1);
-  public static readonly SOUTHEAST = new GridDirection(1, 1);
-  public static readonly SOUTHWEST = new GridDirection(-1, 1);
-  public static readonly NORTHEAST = new GridDirection(1, -1);
-  public static readonly NORTHWEST = new GridDirection(-1, -1);
-
   readonly gridWidth: number;
   readonly gridHeight: number;
   readonly letters: Array<string>;
@@ -152,6 +134,25 @@ export class LetterGrid {
     return new LetterGrid(newLetters);
   }
 
+  setRandom(x: number, y: number): LetterGrid {
+    const randomLetter =
+      lettersToChoose[Math.floor(Math.random() * lettersToChoose.length)];
+    return this.set(x, y, randomLetter);
+  }
+
+  fillVacant(): LetterGrid {
+    let curr: LetterGrid = this;
+    for (let x = 0; x < this.getWidth(); x++) {
+      for (let y = 0; y < this.getHeight(); y++) {
+        if (curr.get(x, y) == "?") {
+          curr = curr.setRandom(x, y);
+        }
+      }
+    }
+
+    return curr;
+  }
+
   placeWordAt(
     x: number,
     y: number,
@@ -188,5 +189,40 @@ export class LetterGrid {
     }
 
     return currGrid;
+  }
+
+  randomPlacementAttempt(word: string): WordLocation | undefined {
+    const x = randomNumber(this.getWidth());
+    const y = randomNumber(this.getHeight());
+    const directionOffset = randomNumber(GridDirection.ALL_DIRECTIONS.length);
+
+    for (let i = 0; i < GridDirection.ALL_DIRECTIONS.length; i++) {
+      const direction =
+        GridDirection.ALL_DIRECTIONS[
+          (i + directionOffset) % GridDirection.ALL_DIRECTIONS.length
+        ];
+      if (this.placeWordAt(x, y, direction, word)) {
+        return new WordLocation(x, y, direction);
+      }
+    }
+
+    return undefined;
+  }
+
+  findRandomPlacement(word: string): WordLocation | undefined {
+    const solver = new WordSeekFinder(this.fillVacant());
+    const existingLocation = solver.findWord(word);
+    if (existingLocation) {
+      return existingLocation;
+    } else {
+      for (let i = 0; i < maxPlacementAttemptBeforeExpand; i++) {
+        const randomPlacement = this.randomPlacementAttempt(word);
+        if (randomPlacement) {
+          return randomPlacement;
+        }
+      }
+
+      return undefined;
+    }
   }
 }

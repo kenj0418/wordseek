@@ -1,5 +1,3 @@
-import * as fs from "fs";
-
 const cleanWord = (word: string): string => {
   return word.replace(/[^0-9a-z]/gi, "");
 };

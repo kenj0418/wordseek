@@ -1,7 +1,9 @@
 import { expect } from "chai";
 import randomString from "random-string";
+import { GridDirection } from "../src/GridDirection";
 import { WordList } from "../src/WordList";
 import { WordSeekGrid } from "../src/WordSeekGrid";
+import { WordSeekFinder } from "../src/WordSeekFinder";
 
 describe("WordSeekGrid", function() {
   // const getRandomString = () => randomString({ letters: true, numbers: true });
@@ -54,30 +56,44 @@ describe("WordSeekGrid", function() {
     const wg = new WordSeekGrid(wordList);
     expect(wg.getWordsOutput()).to.equal(testWord);
 
-    const grid = wg.getGridOutput();
+    expect(wg.getGridOutput().length).to.equal(
+      (wg.getWidth() + "\n".length) * wg.getHeight() - 1
+    );
 
-    if (wg.getWidth() == 1) {
-      //word placed vertically
-      expect(wg.getHeight()).to.equal(testWord.length);
-    } else if (wg.getHeight() == 1) {
+    const grid = wg.getGrid();
+    console.log("GRID:", wg.getGridOutput());
+
+    const solver = new WordSeekFinder(grid);
+    const wordLoc = solver.findWord(testWord);
+    expect(wordLoc).to.exist;
+    expect(wordLoc!.getDirection()).to.exist;
+    if (
+      wordLoc!.getDirection() == GridDirection.EAST ||
+      wordLoc!.getDirection() == GridDirection.WEST
+    ) {
       expect(wg.getWidth()).to.equal(testWord.length);
-      //word placed horizontally
+      expect(wg.getHeight()).to.equal(1);
+    } else if (
+      wordLoc!.getDirection() == GridDirection.NORTH ||
+      wordLoc!.getDirection() == GridDirection.SOUTH
+    ) {
+      expect(wg.getWidth()).to.equal(1);
+      expect(wg.getHeight()).to.equal(testWord.length);
     } else {
-      //word placed diag
       expect(wg.getWidth()).to.equal(testWord.length);
       expect(wg.getHeight()).to.equal(testWord.length);
     }
-
-    expect(3).to.equal(4); //todo need to add a test to find the actual word
   });
-
-  //todo need to make solver/finder in order to make most of these tests
 
   xit("one word, forced grid size, is output", () => {
     //
   });
 
   xit("one word, too small forced grid size, throws", () => {
+    //
+  });
+
+  xit("no ? left", () => {
     //
   });
 
