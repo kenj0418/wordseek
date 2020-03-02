@@ -222,34 +222,20 @@ export class LetterGrid {
     );
   }
 
-  randomPlacementAttempt(word: string): WordLocation | undefined {
-    const x = randomNumber(this.getWidth());
-    const y = randomNumber(this.getHeight());
-    const directionOffset = randomNumber(GridDirection.ALL_DIRECTIONS.length);
-
-    for (let i = 0; i < GridDirection.ALL_DIRECTIONS.length; i++) {
-      const direction =
-        GridDirection.ALL_DIRECTIONS[
-          (i + directionOffset) % GridDirection.ALL_DIRECTIONS.length
-        ];
-      if (this.placeWordAt(word, x, y, direction)) {
-        return new WordLocation(x, y, direction);
-      }
-    }
-
-    return undefined;
-  }
-
-  findRandomPlacement(word: string): WordLocation | undefined {
+  findRandomPlacement(
+    word: string,
+    direction: GridDirection
+  ): WordLocation | undefined {
     const solver = new WordSeekFinder(this.fillVacant());
     const existingLocation = solver.findWord(word);
     if (existingLocation) {
       return existingLocation;
     } else {
       for (let i = 0; i < maxPlacementAttemptBeforeExpand; i++) {
-        const randomPlacement = this.randomPlacementAttempt(word);
-        if (randomPlacement) {
-          return randomPlacement;
+        const x = randomNumber(this.getWidth());
+        const y = randomNumber(this.getHeight());
+        if (this.placeWordAt(word, x, y, direction)) {
+          return new WordLocation(x, y, direction);
         }
       }
 
@@ -260,9 +246,14 @@ export class LetterGrid {
   addWord(word: string): LetterGrid {
     const maxExpand = word.length * 5; // so doesn't try for ever if things go wrong
 
+    const randomDirection =
+      GridDirection.ALL_DIRECTIONS[
+        randomNumber(GridDirection.ALL_DIRECTIONS.length)
+      ];
+
     let currGrid: LetterGrid = this;
     for (let i = 0; i <= maxExpand; i++) {
-      const placement = currGrid.findRandomPlacement(word);
+      const placement = currGrid.findRandomPlacement(word, randomDirection);
       if (placement) {
         return currGrid.placeWord(word, placement)!;
       }

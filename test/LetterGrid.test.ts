@@ -301,7 +301,10 @@ describe("LetterGrid", function() {
 
     it("if already there, use existing placement, even if other valid placements", () => {
       const grid = new LetterGrid(["??C", "DEF", "G?I"]);
-      const placement = grid.findRandomPlacement("CEG");
+      const placement = grid.findRandomPlacement(
+        "CEG",
+        GridDirection.SOUTHWEST
+      );
       expect(placement).to.exist;
       expect(placement!.getX()).to.equal(2);
       expect(placement!.getY()).to.equal(0);
@@ -310,27 +313,21 @@ describe("LetterGrid", function() {
 
     it("place within existing empty grid", () => {
       const grid = new LetterGrid(["???", "???", "???"]);
-      const placement = grid.findRandomPlacement("QW");
+      const placement = grid.findRandomPlacement("QW", GridDirection.EAST);
       expect(placement).to.exist;
       expect(placement!.getX()).be.at.least(0);
-      expect(placement!.getX()).be.at.most(2);
+      expect(placement!.getX()).be.at.most(1);
       expect(placement!.getY()).be.at.least(0);
       expect(placement!.getY()).be.at.most(2);
     });
 
     it("place within existing grid with overlaps", () => {
       const grid = new LetterGrid(["??C", "DEF", "G?I"]);
-      const placement = grid.findRandomPlacement("QEX");
+      const placement = grid.findRandomPlacement("QEX", GridDirection.SOUTH);
       expect(placement).to.exist;
-      if (placement!.getDirection() == GridDirection.SOUTH) {
-        expect(placement!.getX()).to.equal(1);
-        expect(placement!.getY()).to.equal(0);
-      } else if (placement!.getDirection() == GridDirection.NORTH) {
-        expect(placement!.getX()).to.equal(1);
-        expect(placement!.getY()).to.equal(2);
-      } else {
-        throw new Error("Unexpected placement, expected either NORTH or SOUTH");
-      }
+      expect(placement!.getDirection()).to.equal(GridDirection.SOUTH);
+      expect(placement!.getX()).to.equal(1);
+      expect(placement!.getY()).to.equal(0);
     });
 
     it("different placements are used randomly", () => {
@@ -348,9 +345,15 @@ describe("LetterGrid", function() {
         empty,
         empty
       ]);
-      const placement1 = grid.findRandomPlacement(testWord);
+      const placement1 = grid.findRandomPlacement(
+        testWord,
+        GridDirection.SOUTH
+      );
       expect(placement1).to.exist;
-      const placement2 = grid.findRandomPlacement(testWord);
+      const placement2 = grid.findRandomPlacement(
+        testWord,
+        GridDirection.SOUTH
+      );
       expect(placement2).to.exist;
       const index1 = placement1!.getX() + placement1!.getY() * grid.getWidth();
       const index2 = placement2!.getX() + placement2!.getY() * grid.getWidth();
@@ -359,20 +362,23 @@ describe("LetterGrid", function() {
 
     it("no placement when grid needs to expand because too small", () => {
       const grid = new LetterGrid(["???", "???", "???"]);
-      const placement = grid.findRandomPlacement("ABCDEFG");
+      const placement = grid.findRandomPlacement(
+        "ABCDEFG",
+        GridDirection.NORTHEAST
+      );
       expect(placement).to.not.exist;
     });
 
     it("place when grid needs to expand because no placements to use inside", () => {
       const grid = new LetterGrid(["ABC", "??F", "GHI"]);
-      const placement = grid.findRandomPlacement("XYZ");
+      const placement = grid.findRandomPlacement("XYZ", GridDirection.NORTH);
       expect(placement).to.not.exist;
     });
   });
 
   describe("addWord", function() {
     beforeEach(function() {
-      this.retries(1); //todo //since random and might not get what we want on first try
+      this.retries(10);
     });
 
     it("adds a word successfully on existing grid", () => {
@@ -389,7 +395,7 @@ describe("LetterGrid", function() {
     it("adds a word after expanding grid", () => {
       const testWord = "ABCD";
       const grid = new LetterGrid(["???", "???", "???"]);
-      const gridWithWord = grid.addWord(testWord); //todo.fillVacant();
+      const gridWithWord = grid.addWord(testWord).fillVacant();
       expect(gridWithWord.getWidth()).to.be.at.least(3);
       expect(gridWithWord.getHeight()).to.be.at.least(3);
       if (
@@ -444,7 +450,7 @@ describe("LetterGrid", function() {
       }
     });
 
-    xit("words are not all aligned", () => {
+    it("words are not all aligned", () => {
       const testWords = [
         randomWord(),
         randomWord(),
@@ -462,9 +468,6 @@ describe("LetterGrid", function() {
       for (let i = 0; i < testWords.length; i++) {
         currGrid = currGrid.addWord(testWords[i]);
       }
-
-      console.log(currGrid.getLetters().join("\n"));
-      console.log(testWords);
 
       const solver = new WordSeekFinder(currGrid);
 
