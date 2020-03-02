@@ -14,6 +14,10 @@ export class WordList {
     this.words = cleanWordsArray(words);
   }
 
+  getCount(): number {
+    return this.words.length;
+  }
+
   getAllWords(): Array<string> {
     return this.words;
   }

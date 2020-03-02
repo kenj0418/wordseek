@@ -450,7 +450,9 @@ describe("LetterGrid", function() {
       }
     });
 
-    it("words are not all aligned", () => {
+    it("words are not all aligned", function() {
+      this.timeout(20000);
+
       const testWords = [
         randomWord(),
         randomWord(),

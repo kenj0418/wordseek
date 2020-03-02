@@ -50,7 +50,7 @@ describe("WordSeekGrid", function() {
     expect(grid.split("\n").length).to.equal(gridHeight);
   });
 
-  xit("one word, is output", () => {
+  it("one word, is output", () => {
     const testWord = randomString();
     const wordList = new WordList([testWord]);
     const wg = new WordSeekGrid(wordList);
@@ -61,35 +61,24 @@ describe("WordSeekGrid", function() {
     );
 
     const grid = wg.getGrid();
-    console.log("GRID:", wg.getGridOutput());
-
     const solver = new WordSeekFinder(grid);
     const wordLoc = solver.findWord(testWord);
     expect(wordLoc).to.exist;
-    expect(wordLoc!.getDirection()).to.exist;
-    if (
-      wordLoc!.getDirection() == GridDirection.EAST ||
-      wordLoc!.getDirection() == GridDirection.WEST
-    ) {
-      expect(wg.getWidth()).to.equal(testWord.length);
-      expect(wg.getHeight()).to.equal(1);
-    } else if (
-      wordLoc!.getDirection() == GridDirection.NORTH ||
-      wordLoc!.getDirection() == GridDirection.SOUTH
-    ) {
-      expect(wg.getWidth()).to.equal(1);
-      expect(wg.getHeight()).to.equal(testWord.length);
-    } else {
-      expect(wg.getWidth()).to.equal(testWord.length);
-      expect(wg.getHeight()).to.equal(testWord.length);
-    }
   });
 
-  xit("no ? left", () => {
-    //
+  it("no ? left", () => {
+    const wordList = new WordList([randomString()]);
+    const wg = new WordSeekGrid(wordList);
+    expect(wg.getGridOutput()).to.not.have.string("?");
   });
 
-  xit("word outut list is sorted", () => {
-    //
+  it("word output list is sorted", () => {
+    const aaa = "AAAAAAAAAAA";
+    const bbb = "BBBBB";
+    const ccc = "CC";
+
+    const wordList = new WordList([bbb, aaa, ccc]);
+    const wg = new WordSeekGrid(wordList);
+    expect(wg.getWordsOutput()).to.equal([aaa, bbb, ccc].join("\n"));
   });
 });

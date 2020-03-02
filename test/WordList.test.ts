@@ -8,25 +8,30 @@ describe("WordList", function() {
   it("empty array, empty list", () => {
     const wl = new WordList([]);
     expect(wl.getAllWords()).to.deep.equal([]);
+    expect(wl.getCount()).to.equal(0);
   });
 
   it("getting random word from empty list returns null", () => {
     const wl = new WordList([]);
     expect(wl.getRandomWord()).to.not.exist;
+    expect(wl.getCount()).to.equal(0);
   });
 
   it("single word list is in list", () => {
     const testWord = getRandomString();
     const wl = new WordList([testWord]);
     expect(wl.getAllWords()).to.deep.equal([testWord]);
+    expect(wl.getCount()).to.equal(1);
   });
 
   it("single word list removed from list", () => {
     const testWord = getRandomString();
     const wl = new WordList([testWord]);
     expect(wl.getRandomWord()).to.equal(testWord);
+    expect(wl.getCount()).to.equal(1);
     const remainingWl = wl.getRemainingWordList(testWord);
     expect(remainingWl.getAllWords()).to.deep.equal([]);
+    expect(remainingWl.getCount()).to.equal(0);
   });
 
   it("multiple words in list", () => {
@@ -35,14 +40,15 @@ describe("WordList", function() {
     const testWord3 = getRandomString();
     const inputArray = [testWord1, testWord2, testWord3];
     const wl = new WordList(inputArray);
+    expect(wl.getCount()).to.equal(3);
     const randomWord = wl.getRandomWord();
     expect(randomWord).to.exist;
-    expect(inputArray.indexOf(randomWord!)).to.be.above(-1);
+    expect(inputArray).to.contain(randomWord!);
     const outputArray = wl.getAllWords();
     expect(outputArray.length).to.equal(3);
-    expect(outputArray.indexOf(testWord1)).to.be.above(-1);
-    expect(outputArray.indexOf(testWord2)).to.be.above(-1);
-    expect(outputArray.indexOf(testWord3)).to.be.above(-1);
+    expect(outputArray).to.contain(testWord1);
+    expect(outputArray).to.contain(testWord2);
+    expect(outputArray).to.contain(testWord3);
   });
 
   it("duplicate words in list removed", () => {
@@ -52,11 +58,11 @@ describe("WordList", function() {
     const wl = new WordList(inputArray);
     const randomWord = wl.getRandomWord();
     expect(randomWord).to.exist;
-    expect(inputArray.indexOf(randomWord!)).to.be.above(-1);
+    expect(inputArray).to.contain(randomWord!);
     const outputArray = wl.getAllWords();
     expect(outputArray.length).to.equal(2);
-    expect(outputArray.indexOf(testWord1)).to.be.above(-1);
-    expect(outputArray.indexOf(testWord2)).to.be.above(-1);
+    expect(outputArray).to.contain(testWord1);
+    expect(outputArray).to.contain(testWord2);
   });
 
   it("non alpha-numeric removed from words", () => {
@@ -80,14 +86,12 @@ describe("WordList", function() {
     const wl = new WordList(inputArray);
     const randomWord = wl.getRandomWord();
     expect(randomWord).to.exist;
-    expect(
-      [cleanWord1, testWord2, cleanWord3].indexOf(randomWord!)
-    ).to.be.above(-1);
+    expect([cleanWord1, testWord2, cleanWord3]).to.contain(randomWord!);
     const outputArray = wl.getAllWords();
     expect(outputArray.length).to.equal(3);
-    expect(outputArray.indexOf(cleanWord1)).to.be.above(-1);
-    expect(outputArray.indexOf(testWord2)).to.be.above(-1);
-    expect(outputArray.indexOf(cleanWord3)).to.be.above(-1);
+    expect(outputArray).to.contain(cleanWord1);
+    expect(outputArray).to.contain(testWord2);
+    expect(outputArray).to.contain(cleanWord3);
   });
 
   it("random gives different values", function() {
@@ -104,8 +108,8 @@ describe("WordList", function() {
     const randomWord2 = new WordList(inputArray).getRandomWord();
     expect(randomWord1).to.exist;
     expect(randomWord2).to.exist;
-    expect(inputArray.indexOf(randomWord1!)).to.be.above(-1);
-    expect(inputArray.indexOf(randomWord2!)).to.be.above(-1);
+    expect(inputArray).to.contain(randomWord1!);
+    expect(inputArray).to.contain(randomWord2!);
     expect(randomWord1).to.not.equal(randomWord2);
   });
 

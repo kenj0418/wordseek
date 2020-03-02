@@ -5,13 +5,27 @@ export class WordSeekGrid {
   readonly words: WordList;
   readonly grid: LetterGrid;
 
+  static generateGrid(baseGrid: LetterGrid, wordList: WordList): LetterGrid {
+    let currGrid = baseGrid;
+    let currWordList = wordList;
+
+    let currWord = currWordList.getRandomWord();
+    while (currWord) {
+      currGrid = currGrid.addWord(currWord);
+      currWordList = currWordList.getRemainingWordList(currWord);
+      currWord = currWordList.getRandomWord();
+    }
+
+    return currGrid.fillVacant();
+  }
+
   constructor(wordList: WordList, forceWidth?: number, forceHeight?: number) {
-    const baseGrid = new LetterGrid();
-    this.grid =
+    const baseGrid =
       forceWidth || forceHeight
-        ? baseGrid.expandSize(forceWidth || 0, forceHeight || 0)
-        : baseGrid;
+        ? new LetterGrid().expandSize(forceWidth || 0, forceHeight || 0)
+        : new LetterGrid();
     this.words = wordList;
+    this.grid = WordSeekGrid.generateGrid(baseGrid, wordList);
   }
 
   getGrid(): LetterGrid {
@@ -23,7 +37,10 @@ export class WordSeekGrid {
   }
 
   getWordsOutput(): string {
-    return this.words.getAllWords().join("\n");
+    return this.words
+      .getAllWords()
+      .sort()
+      .join("\n");
   }
 
   getWidth(): number {
