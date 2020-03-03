@@ -50,8 +50,4 @@ export class WordSeekGrid {
   getHeight(): number {
     return this.grid.getHeight();
   }
-
-  // getOutput(): string {
-  //   return this.getGridOutput() + "\n\n" + this.getWordsOutput();
-  // }
 }

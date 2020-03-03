@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "tsc; node index.js",
+    "start": "tsc && node dist/index.js",
     "build": "tsc",
     "watch": "tsc -w",
     "test": "mocha -r ts-node/register test/**/*.test.ts --watch-extensions ts",
@@ -13,7 +13,9 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@types/node": "^13.7.4"
+    "@types/node": "^13.7.4",
+    "@types/pdfkit": "^0.10.5",
+    "pdfkit": "^0.11.0"
   },
   "devDependencies": {
     "@types/chai": "^4.2.9",

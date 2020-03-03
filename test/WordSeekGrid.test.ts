@@ -6,7 +6,8 @@ import { WordSeekGrid } from "../src/WordSeekGrid";
 import { WordSeekFinder } from "../src/WordSeekFinder";
 
 describe("WordSeekGrid", function() {
-  // const getRandomString = () => randomString({ letters: true, numbers: true });
+  const getRandomString = () =>
+    randomString({ letters: true, numbers: true }).toUpperCase();
 
   const verifyGridSize = (
     grid: string,
@@ -51,7 +52,7 @@ describe("WordSeekGrid", function() {
   });
 
   it("one word, is output", () => {
-    const testWord = randomString();
+    const testWord = getRandomString();
     const wordList = new WordList([testWord]);
     const wg = new WordSeekGrid(wordList);
     expect(wg.getWordsOutput()).to.equal(testWord);
@@ -67,7 +68,7 @@ describe("WordSeekGrid", function() {
   });
 
   it("no ? left", () => {
-    const wordList = new WordList([randomString()]);
+    const wordList = new WordList([getRandomString()]);
     const wg = new WordSeekGrid(wordList);
     expect(wg.getGridOutput()).to.not.have.string("?");
   });

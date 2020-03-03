@@ -3,7 +3,8 @@ import randomString from "random-string";
 import { WordList } from "../src/WordList";
 
 describe("WordList", function() {
-  const getRandomString = () => randomString({ letters: true, numbers: true });
+  const getRandomString = () =>
+    randomString({ letters: true, numbers: true }).toUpperCase();
 
   it("empty array, empty list", () => {
     const wl = new WordList([]);
@@ -63,6 +64,32 @@ describe("WordList", function() {
     expect(outputArray.length).to.equal(2);
     expect(outputArray).to.contain(testWord1);
     expect(outputArray).to.contain(testWord2);
+  });
+
+  it("made all caps", () => {
+    const testWord1A = getRandomString();
+    const testWord1B = getRandomString();
+    const testWordMixedCase =
+      testWord1A.toLowerCase() + testWord1B.toUpperCase();
+    const testWordAllCaps = testWord1A.toUpperCase() + testWord1B.toUpperCase();
+    const wl = new WordList([testWordMixedCase]);
+    const randomWord = wl.getRandomWord();
+    expect(randomWord).to.equal(testWordAllCaps);
+    const outputArray = wl.getAllWords();
+    expect(outputArray).to.deep.equal([testWordAllCaps]);
+  });
+
+  it("Original version still there", () => {
+    const testWord1A = getRandomString();
+    const testWord1B = getRandomString();
+    const testWordMixedCase =
+      testWord1A.toLowerCase() + testWord1B.toUpperCase();
+    const testWordAllCaps = testWord1A.toUpperCase() + testWord1B.toUpperCase();
+    const wl = new WordList([testWordMixedCase]);
+    const randomWord = wl.getRandomWord();
+    expect(randomWord).to.equal(testWordAllCaps);
+    const outputArray = wl.getAllWordsOriginal();
+    expect(outputArray).to.deep.equal([testWordMixedCase]);
   });
 
   it("non alpha-numeric removed from words", () => {

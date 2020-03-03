@@ -1,5 +1,5 @@
 const cleanWord = (word: string): string => {
-  return word.replace(/[^0-9a-z]/gi, "");
+  return word.replace(/[^0-9a-z]/gi, "").toUpperCase();
 };
 
 const cleanWordsArray = (words: Array<string>): Array<string> => {
@@ -8,9 +8,11 @@ const cleanWordsArray = (words: Array<string>): Array<string> => {
 };
 
 export class WordList {
+  readonly originalWords: Array<string>;
   readonly words: Array<string>;
 
   constructor(words: Array<string>) {
+    this.originalWords = [...new Set<string>(words)];
     this.words = cleanWordsArray(words);
   }
 
@@ -20,6 +22,10 @@ export class WordList {
 
   getAllWords(): Array<string> {
     return this.words;
+  }
+
+  getAllWordsOriginal(): Array<string> {
+    return this.originalWords.sort();
   }
 
   getRandomWord(): string | undefined {
