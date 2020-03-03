@@ -5,9 +5,12 @@ import { WordSeekGrid } from "./src/WordSeekGrid";
 import { WordSeekFinder } from "./src/WordSeekFinder";
 import { LetterGrid } from "./src/LetterGrid";
 
+const filename = "data/stlouisSmall.txt";
+const outputFilename = "output/stlouisSmall.pdf";
 // const filename = "data/stlouis.txt";
-const filename = "data/ocelot.txt";
-const outputFilename = "output/ocelot.pdf";
+// const outputFilename = "output/stlouis.pdf";
+// const filename = "data/ocelot.txt";
+// const outputFilename = "output/ocelot.pdf";
 
 const readFileAsArray = (filename: string): Array<string> => {
   return fs
@@ -81,7 +84,7 @@ const wordLines = Math.ceil(words.length / wordsPerLine);
 const wordHorizStart = 50;
 const wordVertStart = lineStartVert + 25;
 const wordHorizSpacing = Math.floor(600 / wordsPerLine);
-const wordVertSpacing = 20;
+const wordVertSpacing = 30;
 
 for (let wordLine = 0; wordLine < wordLines; wordLine++) {
   for (let wordNum = 0; wordNum < wordsPerLine; wordNum++) {

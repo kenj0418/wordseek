@@ -504,5 +504,18 @@ describe("LetterGrid", function() {
       expect(horiz).to.be.at.least(1);
       expect(diag).to.be.at.least(1);
     });
+
+    it("addWord, expanding only vertically", () => {
+      const testWord = "ABCD";
+      const testWidth = 10;
+      const grid = new LetterGrid(["???", "???", "???"], testWidth);
+      const gridWithWord = grid.addWord(testWord).fillVacant();
+      expect(gridWithWord.getWidth()).to.equal(testWidth);
+      expect(gridWithWord.getHeight()).to.be.at.least(3);
+
+      const solver = new WordSeekFinder(gridWithWord);
+      expect(solver.findWord(testWord)).to.exist;
+      //
+    });
   });
 });

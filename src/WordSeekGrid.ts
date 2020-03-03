@@ -19,10 +19,13 @@ export class WordSeekGrid {
     return currGrid.fillVacant();
   }
 
-  constructor(wordList: WordList, forceWidth?: number, forceHeight?: number) {
+  constructor(wordList: WordList, fixedWidth?: number, initialHeight?: number) {
     const baseGrid =
-      forceWidth || forceHeight
-        ? new LetterGrid().expandSize(forceWidth || 0, forceHeight || 0)
+      fixedWidth || initialHeight
+        ? new LetterGrid([], fixedWidth || 0).expandSize(
+            fixedWidth || 0,
+            initialHeight || 0
+          )
         : new LetterGrid();
     this.words = wordList;
     this.grid = WordSeekGrid.generateGrid(baseGrid, wordList);
