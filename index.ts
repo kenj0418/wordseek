@@ -1,7 +1,7 @@
 import * as fs from "fs";
 import * as pdfkit from "pdfkit";
 import { WordList } from "./src/WordList";
-import { WordSeekGrid } from "./src/WordSeekGrid";
+import { WordSeekPuzzle } from "./src/WordSeekPuzzle";
 import { WordSeekFinder } from "./src/WordSeekFinder";
 import { LetterGrid } from "./src/LetterGrid";
 
@@ -20,13 +20,13 @@ const readFileAsArray = (filename: string): Array<string> => {
     .filter(word => word.length);
 };
 
-const getOutput = (grid: WordSeekGrid): string => {
+const getOutput = (grid: WordSeekPuzzle): string => {
   return grid.getGridOutput() + "\n\n" + grid.getWordsOutput();
 };
 
 const wl = new WordList(readFileAsArray(filename));
 
-let wsGrid = new WordSeekGrid(wl, 30, 20);
+let wsGrid = new WordSeekPuzzle(wl, 30, 20);
 // console.log(getOutput(wsGrid));
 
 // const solver = new WordSeekFinder(wsGrid.getGrid());

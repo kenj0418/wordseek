@@ -1,4 +1,4 @@
-import { LetterGrid } from "./LetterGrid";
+import { WordSeekGrid } from "./WordSeekGrid";
 import { GridDirection } from "./GridDirection";
 import { WordLocation } from "./WordLocation";
 
@@ -7,9 +7,9 @@ interface WordLocationMapping {
 }
 
 export class WordSeekFinder {
-  readonly grid: LetterGrid;
+  readonly grid: WordSeekGrid;
 
-  constructor(grid: LetterGrid) {
+  constructor(grid: WordSeekGrid) {
     this.grid = grid;
   }
 

@@ -42,10 +42,10 @@ const getMaxWidth = (letters: Array<string>): number => {
 };
 
 export class LetterGrid {
-  readonly gridWidth: number;
-  readonly gridHeight: number;
-  readonly letters: Array<string>;
-  readonly allowHorizExpand: boolean;
+  private readonly gridWidth: number;
+  private readonly gridHeight: number;
+  private readonly letters: Array<string>;
+  private readonly allowHorizExpand: boolean;
 
   constructor(letters?: Array<string>, fixedWidth?: number) {
     if (
@@ -91,7 +91,7 @@ export class LetterGrid {
     return this.allowHorizExpand ? 0 : this.gridWidth;
   }
 
-  expandLeft(): LetterGrid {
+  private expandLeft(): LetterGrid {
     if (!this.allowHorizExpand) {
       throw new Error("Cannot expand fixed width grid");
     }
@@ -99,7 +99,7 @@ export class LetterGrid {
     return new LetterGrid(newLetters);
   }
 
-  expandRight(): LetterGrid {
+  private expandRight(): LetterGrid {
     if (!this.allowHorizExpand) {
       throw new Error("Cannot expand fixed width grid");
     }
@@ -107,13 +107,13 @@ export class LetterGrid {
     return new LetterGrid(newLetters);
   }
 
-  expandUp(): LetterGrid {
+  private expandUp(): LetterGrid {
     const targetWidth = this.letters.length ? this.letters[0].length : 0;
     const newLetters = [normalizeStringWidth("", targetWidth), ...this.letters];
     return new LetterGrid(newLetters, this.getFixedWidth());
   }
 
-  expandDown(): LetterGrid {
+  private expandDown(): LetterGrid {
     const targetWidth = this.letters.length ? this.letters[0].length : 0;
     const newLetters = [...this.letters, normalizeStringWidth("", targetWidth)];
     return new LetterGrid(newLetters, this.getFixedWidth());
@@ -209,96 +209,5 @@ export class LetterGrid {
     }
 
     return curr;
-  }
-
-  placeWordAt(
-    word: string,
-    x: number,
-    y: number,
-    direction: GridDirection
-  ): LetterGrid | undefined {
-    let currX = x;
-    let currY = y;
-    let currGrid: LetterGrid = this;
-    let currIndex = 0;
-
-    while (currIndex < word.length) {
-      const outOfRange =
-        currX < 0 ||
-        currY < 0 ||
-        currX >= currGrid.getWidth() ||
-        currY >= currGrid.getHeight();
-      if (outOfRange) {
-        return undefined;
-      }
-
-      const currValue = currGrid.get(currX, currY);
-      const desiredValue = word[currIndex];
-
-      if (currValue == "?") {
-        currGrid = currGrid.set(currX, currY, word[currIndex]);
-      } else if (currValue != desiredValue) {
-        return undefined; // conflict, can't place
-      }
-
-      currIndex++;
-      currX += direction.getX();
-      currY += direction.getY();
-    }
-
-    return currGrid;
-  }
-
-  placeWord(word: string, placement: WordLocation): LetterGrid | undefined {
-    return this.placeWordAt(
-      word,
-      placement.getX(),
-      placement.getY(),
-      placement.getDirection()
-    );
-  }
-
-  findRandomPlacement(
-    word: string,
-    direction: GridDirection
-  ): WordLocation | undefined {
-    const solver = new WordSeekFinder(this.fillVacant());
-    const existingLocation = solver.findWord(word);
-    if (existingLocation) {
-      return existingLocation;
-    } else {
-      for (let i = 0; i < maxPlacementAttemptBeforeExpand; i++) {
-        const x = randomNumber(this.getWidth());
-        const y = randomNumber(this.getHeight());
-        if (this.placeWordAt(word, x, y, direction)) {
-          return new WordLocation(x, y, direction);
-        }
-      }
-
-      return undefined;
-    }
-  }
-
-  addWord(word: string): LetterGrid {
-    const maxExpand = word.length * 5; // so doesn't try for ever if things go wrong
-
-    const randomDirection =
-      GridDirection.ALL_DIRECTIONS[
-        randomNumber(GridDirection.ALL_DIRECTIONS.length)
-      ];
-
-    let currGrid: LetterGrid = this;
-    for (let i = 0; i <= maxExpand; i++) {
-      const placement = currGrid.findRandomPlacement(word, randomDirection);
-      if (placement) {
-        return currGrid.placeWord(word, placement)!;
-      }
-
-      currGrid = currGrid.expandRandom();
-    }
-
-    throw new Error(
-      `Unable to place word even after expanding grid ${maxExpand} times.`
-    );
   }
 }

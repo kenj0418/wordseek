@@ -1,6 +1,7 @@
 import { expect } from "chai";
 import randomString from "random-string";
 import { WordSeekFinder } from "../src/WordSeekFinder";
+import { WordSeekGrid } from "../src/WordSeekGrid";
 import { LetterGrid } from "../src/LetterGrid";
 import { GridDirection } from "../src/GridDirection";
 
@@ -8,7 +9,9 @@ describe("WordSeekFinder", function() {
   let solver: WordSeekFinder;
 
   beforeEach(() => {
-    solver = new WordSeekFinder(new LetterGrid(["ABC", "DEF", "GHI"]));
+    solver = new WordSeekFinder(
+      new WordSeekGrid(new LetterGrid(["ABC", "DEF", "GHI"]))
+    );
   });
 
   it("word not found", () => {
