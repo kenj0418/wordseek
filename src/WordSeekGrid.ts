@@ -11,19 +11,42 @@ const randomNumber = (n: number): number => {
 
 export class WordSeekGrid {
   private readonly letterGrid: LetterGrid;
+  private readonly fixedWidth?: number;
+  private readonly fixedHeight?: number;
 
   constructor();
   constructor(letters: LetterGrid);
   constructor(letters: Array<string>);
-  constructor(letters: Array<string>, fixedWidth?: number);
-  constructor(letters?: Array<string> | LetterGrid, fixedWidth?: number) {
+  constructor(
+    letters: Array<string>,
+    fixedWidth?: number,
+    fixedHeight?: number
+  );
+  constructor(
+    letters?: Array<string> | LetterGrid,
+    fixedWidth?: number,
+    fixedHeight?: number
+  ) {
     if (!letters) {
       this.letterGrid = new LetterGrid();
     } else if (letters && letters instanceof LetterGrid) {
       this.letterGrid = <LetterGrid>letters!;
     } else {
-      this.letterGrid = new LetterGrid(<Array<string>>letters, fixedWidth);
+      this.letterGrid = new LetterGrid(<Array<string>>letters).expandSize(
+        fixedWidth || 0,
+        fixedHeight || 0
+      );
+      this.fixedWidth = fixedWidth;
+      this.fixedHeight = fixedHeight;
     }
+  }
+
+  private newFromLetterGrid(letters: LetterGrid): WordSeekGrid {
+    return new WordSeekGrid(
+      letters.getLetters(),
+      this.fixedWidth,
+      this.fixedHeight
+    );
   }
 
   getWidth(): number {
@@ -39,7 +62,7 @@ export class WordSeekGrid {
   }
 
   fillVacant(): WordSeekGrid {
-    return new WordSeekGrid(this.letterGrid.fillVacant());
+    return this.newFromLetterGrid(this.letterGrid.fillVacant());
   }
 
   private get(x: number, y: number): string {
@@ -47,7 +70,7 @@ export class WordSeekGrid {
   }
 
   private set(x: number, y: number, ch: string): WordSeekGrid {
-    return new WordSeekGrid(this.letterGrid.set(x, y, ch));
+    return this.newFromLetterGrid(this.letterGrid.set(x, y, ch));
   }
 
   placeWordAt(
@@ -105,7 +128,13 @@ export class WordSeekGrid {
   }
 
   private expandRandom(): WordSeekGrid {
-    return new WordSeekGrid(this.letterGrid.expandRandom());
+    if (this.fixedHeight) {
+      throw new Error("Size is fixed and could not be expanded");
+    } else if (this.fixedWidth) {
+      return this.newFromLetterGrid(this.letterGrid.expandVertical());
+    } else {
+      return this.newFromLetterGrid(this.letterGrid.expandRandom());
+    }
   }
 
   private placeWord(
@@ -121,7 +150,29 @@ export class WordSeekGrid {
     );
   }
 
-  addWord(word: string): WordSeekGrid {
+  private addWordFixedGrid(word: string): WordSeekGrid {
+    // adding when can not expand
+    const maxAttempts = 100;
+
+    for (let i = 0; i <= maxAttempts; i++) {
+      const randomDirection =
+        GridDirection.ALL_DIRECTIONS[
+          randomNumber(GridDirection.ALL_DIRECTIONS.length)
+        ];
+
+      const placement = this.findRandomPlacement(word, randomDirection);
+      if (placement) {
+        return this.placeWord(word, placement)!;
+      }
+    }
+
+    throw new Error(
+      `Unable to place word even after trying ${maxAttempts} attempts.  Grid may be too small.`
+    );
+  }
+
+  private addWordExpandableGrid(word: string): WordSeekGrid {
+    // adding when can expand
     const maxExpand = word.length * 5; // so doesn't try for ever if things go wrong
 
     const randomDirection =
@@ -141,62 +192,12 @@ export class WordSeekGrid {
       `Unable to place word even after expanding grid ${maxExpand} times.`
     );
   }
+
+  addWord(word: string): WordSeekGrid {
+    if (this.fixedHeight) {
+      return this.addWordFixedGrid(word);
+    } else {
+      return this.addWordExpandableGrid(word);
+    }
+  }
 }
-
-// private readonly allowHorizExpand: boolean;
-// constructor(letters?: Array<string>, fixedWidth?: number) {
-//   if (
-//     fixedWidth &&
-//     letters &&
-//     letters.length &&
-//     fixedWidth < getMaxWidth(letters)
-//   ) {
-//     throw new Error(
-//       `Fixed width of ${fixedWidth} too small for letters provided with width of ${getMaxWidth(
-//         letters
-//       )}`
-//     );
-//   }
-//   this.allowHorizExpand = !fixedWidth;
-//   this.gridHeight = letters ? letters.length : 0;
-//   if (fixedWidth) {
-//     this.gridWidth = fixedWidth;
-//   } else if (letters && letters.length) {
-//     this.gridWidth = getMaxWidth(letters);
-//   } else {
-//     this.gridWidth = 0;
-//   }
-//   this.letters = letters ? normalizeWidth(letters, this.gridWidth) : [];
-// }
-
-// getFixedWidth(): number | undefined {
-//   return this.allowHorizExpand ? 0 : this.gridWidth;
-// }
-
-// placeWord(word: string, placement: WordLocation): LetterGrid | undefined {
-//   return this.placeWordAt(
-//     word,
-//     placement.getX(),
-//     placement.getY(),
-//     placement.getDirection()
-//   );
-// }
-
-// addWord(word: string): LetterGrid {
-//   const maxExpand = word.length * 5; // so doesn't try for ever if things go wrong
-//   const randomDirection =
-//     GridDirection.ALL_DIRECTIONS[
-//       randomNumber(GridDirection.ALL_DIRECTIONS.length)
-//     ];
-//   let currGrid: LetterGrid = this;
-//   for (let i = 0; i <= maxExpand; i++) {
-//     const placement = currGrid.findRandomPlacement(word, randomDirection);
-//     if (placement) {
-//       return currGrid.placeWord(word, placement)!;
-//     }
-//     currGrid = currGrid.expandRandom();
-//   }
-//   throw new Error(
-//     `Unable to place word even after expanding grid ${maxExpand} times.`
-//   );
-// }

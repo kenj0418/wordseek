@@ -36,7 +36,7 @@ describe("WordSeekPuzzle", function() {
     expect(wg.getWordsOutput()).to.equal("");
   });
 
-  xit("no words, forced grid size, has output", () => {
+  it("no words, forced grid size, has output", () => {
     const wordList = new WordList([]);
     const gridWidth = 5;
     const gridHeight = 10;

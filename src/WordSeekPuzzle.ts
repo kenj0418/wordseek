@@ -6,10 +6,11 @@ export class WordSeekPuzzle {
   readonly grid: WordSeekGrid;
 
   static generateGrid(
-    baseGrid: WordSeekGrid,
-    wordList: WordList
+    wordList: WordList,
+    fixedWidth?: number,
+    fixedHeight?: number
   ): WordSeekGrid {
-    let currGrid = baseGrid;
+    let currGrid = new WordSeekGrid([], fixedWidth, fixedHeight);
     let currWordList = wordList;
 
     let currWord = currWordList.getRandomWord();
@@ -22,11 +23,9 @@ export class WordSeekPuzzle {
     return currGrid.fillVacant();
   }
 
-  constructor(wordList: WordList, fixedWidth?: number, initialHeight?: number) {
-    const baseGrid = new WordSeekGrid([], fixedWidth);
-    //todo nothing with initialHeight currently.
+  constructor(wordList: WordList, fixedWidth?: number, fixedHeight?: number) {
     this.words = wordList;
-    this.grid = WordSeekPuzzle.generateGrid(baseGrid, wordList);
+    this.grid = WordSeekPuzzle.generateGrid(wordList, fixedWidth, fixedHeight);
   }
 
   getGrid(): WordSeekGrid {

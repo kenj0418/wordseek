@@ -365,8 +365,8 @@ describe("WordSeekGrid", function() {
       expect(solver.findWord(testWord)).to.exist;
     });
 
-    xit("addWord multiple times, expanding only vertically", () => {
-      const testWords = ["ABCD", "ABCDEFG", "ABCDEFGHIJKLM"];
+    it("addWord multiple times, expanding only vertically", () => {
+      const testWords = ["ABCD", "ABCDEFG", "ABCDEFGHIJ"];
       const testWidth = 10;
       const grid = new WordSeekGrid(["???", "???", "???"], testWidth);
 
@@ -384,9 +384,65 @@ describe("WordSeekGrid", function() {
 
       const gridWithWord3 = grid.addWord(testWords[2]).fillVacant();
       expect(gridWithWord3.getWidth()).to.equal(testWidth);
-      expect(gridWithWord3.getHeight()).to.be.at.least(testWords[2].length);
+      expect(gridWithWord2.getHeight()).to.be.at.least(3);
       const solver3 = new WordSeekFinder(gridWithWord3);
       expect(solver3.findWord(testWords[2])).to.exist;
+    });
+
+    it("addWord multiple times no expanding in either direction", function() {
+      this.retries(1);
+      this.timeout(20000);
+      for (let repeats = 0; repeats < 20; repeats++) {
+        const testWords = ["ABCDE", "VWXYZ"];
+        const testWidth = 10;
+        const testHeight = 10;
+        const grid = new WordSeekGrid(
+          ["???", "???", "???"],
+          testWidth,
+          testHeight
+        );
+
+        const gridWithWord1 = grid.addWord(testWords[0]);
+        expect(gridWithWord1.getWidth()).to.equal(testWidth);
+        expect(gridWithWord1.getHeight()).to.equal(testHeight);
+        const solver1 = new WordSeekFinder(gridWithWord1);
+        expect(solver1.findWord(testWords[0])).to.exist;
+
+        const gridWithWord2 = gridWithWord1.addWord(testWords[1]).fillVacant();
+        expect(gridWithWord2.getWidth()).to.equal(testWidth);
+        expect(gridWithWord1.getHeight()).to.equal(testHeight);
+        const solver2 = new WordSeekFinder(gridWithWord2);
+        expect(solver2.findWord(testWords[1])).to.exist;
+      }
+    });
+
+    it("addWord multiple times fails when no expanding and no room", function() {
+      this.retries(1);
+      this.timeout(20000);
+      for (let repeats = 0; repeats < 20; repeats++) {
+        const testWords = ["ABCDE", "VWXYZ"];
+        const testWidth = 5;
+        const testHeight = 5;
+        const grid = new WordSeekGrid(
+          ["?????", "??QQQ", "?Q?QQ", "?QQ?Q", "?QQQ?"],
+          testWidth,
+          testHeight
+        );
+
+        const gridWithWord1 = grid.addWord(testWords[0]);
+        expect(gridWithWord1.getWidth()).to.equal(testWidth);
+        expect(gridWithWord1.getHeight()).to.equal(testHeight);
+        const solver1 = new WordSeekFinder(gridWithWord1);
+        expect(solver1.findWord(testWords[0])).to.exist;
+
+        let receivedException: Error | undefined;
+        try {
+          gridWithWord1.addWord(testWords[1]);
+        } catch (ex) {
+          receivedException = ex;
+        }
+        expect(receivedException).to.exist;
+      }
     });
   });
 });

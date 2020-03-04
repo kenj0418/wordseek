@@ -45,33 +45,14 @@ export class LetterGrid {
   private readonly gridWidth: number;
   private readonly gridHeight: number;
   private readonly letters: Array<string>;
-  private readonly allowHorizExpand: boolean;
 
-  constructor(letters?: Array<string>, fixedWidth?: number) {
-    if (
-      fixedWidth &&
-      letters &&
-      letters.length &&
-      fixedWidth < getMaxWidth(letters)
-    ) {
-      throw new Error(
-        `Fixed width of ${fixedWidth} too small for letters provided with width of ${getMaxWidth(
-          letters
-        )}`
-      );
-    }
-
-    this.allowHorizExpand = !fixedWidth;
-
+  constructor(letters?: Array<string>) {
     this.gridHeight = letters ? letters.length : 0;
-    if (fixedWidth) {
-      this.gridWidth = fixedWidth;
-    } else if (letters && letters.length) {
+    if (letters && letters.length) {
       this.gridWidth = getMaxWidth(letters);
     } else {
       this.gridWidth = 0;
     }
-
     this.letters = letters ? normalizeWidth(letters, this.gridWidth) : [];
   }
 
@@ -87,22 +68,12 @@ export class LetterGrid {
     return this.letters;
   }
 
-  getFixedWidth(): number | undefined {
-    return this.allowHorizExpand ? 0 : this.gridWidth;
-  }
-
   private expandLeft(): LetterGrid {
-    if (!this.allowHorizExpand) {
-      throw new Error("Cannot expand fixed width grid");
-    }
     const newLetters = this.letters.map(row => "?" + row);
     return new LetterGrid(newLetters);
   }
 
   private expandRight(): LetterGrid {
-    if (!this.allowHorizExpand) {
-      throw new Error("Cannot expand fixed width grid");
-    }
     const newLetters = this.letters.map(row => row + "?");
     return new LetterGrid(newLetters);
   }
@@ -110,17 +81,17 @@ export class LetterGrid {
   private expandUp(): LetterGrid {
     const targetWidth = this.letters.length ? this.letters[0].length : 0;
     const newLetters = [normalizeStringWidth("", targetWidth), ...this.letters];
-    return new LetterGrid(newLetters, this.getFixedWidth());
+    return new LetterGrid(newLetters);
   }
 
   private expandDown(): LetterGrid {
     const targetWidth = this.letters.length ? this.letters[0].length : 0;
     const newLetters = [...this.letters, normalizeStringWidth("", targetWidth)];
-    return new LetterGrid(newLetters, this.getFixedWidth());
+    return new LetterGrid(newLetters);
   }
 
-  expandRandom(): LetterGrid {
-    const direction = randomNumber(this.allowHorizExpand ? 4 : 2);
+  expandRandom(fixedWidth?: boolean): LetterGrid {
+    const direction = randomNumber(fixedWidth ? 2 : 4);
 
     let currGrid: LetterGrid = this;
 
@@ -141,6 +112,10 @@ export class LetterGrid {
     }
 
     return currGrid;
+  }
+
+  expandVertical(): LetterGrid {
+    return this.expandRandom(true);
   }
 
   expandSize(newWidth: number, newHeight: number): LetterGrid {
@@ -189,7 +164,7 @@ export class LetterGrid {
     const newLetters = this.letters.map((row, index) => {
       return index == y ? setInString(row, x, ch) : row;
     });
-    return new LetterGrid(newLetters, this.getFixedWidth());
+    return new LetterGrid(newLetters);
   }
 
   setRandom(x: number, y: number): LetterGrid {
