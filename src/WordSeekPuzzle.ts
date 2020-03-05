@@ -32,8 +32,12 @@ export class WordSeekPuzzle {
     return this.grid;
   }
 
-  getGridLetters(): string[] {
+  getGridLetters(): Array<string> {
     return this.grid.getLetters();
+  }
+
+  getWords(): Array<string> {
+    return this.words.getAllWords().sort();
   }
 
   getWordsOutput(): string {

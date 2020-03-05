@@ -7,7 +7,7 @@ import * as pdfkit from "pdfkit";
 import * as sinon from "sinon";
 const PDFDocument = require("pdfkit");
 
-describe.only("WordSeekPdfFormatter", function() {
+describe("WordSeekPdfFormatter", function() {
   class MockPuzzle extends WordSeekPuzzle {
     readonly mockWords: Array<string>;
     readonly mockLetters: Array<string>;
@@ -25,15 +25,6 @@ describe.only("WordSeekPdfFormatter", function() {
     getWords(): Array<string> {
       return this.mockWords;
     }
-
-    //todo need width and height? probably
-    // getWidth(): number {
-    //   return this.grid.getWidth();
-    // }
-
-    // getHeight(): number {
-    //   return this.grid.getHeight();
-    // }
   }
 
   describe("with real pdfkit", function() {
@@ -53,7 +44,7 @@ describe.only("WordSeekPdfFormatter", function() {
   });
 
   describe("with mock pdfkit", function() {
-    let listeners: any = {};
+    let listeners: any;
     let mockPdfDoc: any;
     let testFormatter: WordSeekPdfFormatter;
 
@@ -91,6 +82,18 @@ describe.only("WordSeekPdfFormatter", function() {
       text(st: string, x: number, y: number): MockPdfDocument {
         return this.callListener("text", st, x, y);
       }
+
+      moveTo(x: number, y: number): MockPdfDocument {
+        return this.callListener("moveTo", x, y);
+      }
+
+      lineTo(x: number, y: number): MockPdfDocument {
+        return this.callListener("lineTo", x, y);
+      }
+
+      fill(color: number): MockPdfDocument {
+        return this.callListener("fill", color);
+      }
     }
 
     class WordSeekPdfFormatterWithMockPdfKit extends WordSeekPdfFormatter {
@@ -107,6 +110,7 @@ describe.only("WordSeekPdfFormatter", function() {
     }
 
     beforeEach(() => {
+      listeners = {};
       mockPdfDoc = new MockPdfDocument(listeners);
       testFormatter = new WordSeekPdfFormatterWithMockPdfKit(mockPdfDoc);
     });
@@ -132,9 +136,11 @@ describe.only("WordSeekPdfFormatter", function() {
 
       const pdfBuffer = await testFormatter.format(puzzle);
 
+      // not worried about the particular font or siize for the test
+      // also not worried if diff fonts used between grid and word list
       expect(listeners["font"]).to.exist;
       expect(listeners["font"].firstCall).to.exist;
-      expect(listeners["font"].firstCall.args[0]).to.exist; // not worried about the particular font for the test
+      expect(listeners["font"].firstCall.args[0]).to.exist;
 
       expect(listeners["fontSize"]).to.exist;
       expect(listeners["fontSize"].firstCall).to.exist;
@@ -178,10 +184,10 @@ describe.only("WordSeekPdfFormatter", function() {
       return st;
     };
 
-    const fillArr = (st: string, len: number): Array<string> => {
+    const fillArr = (len: number, st?: string): Array<string> => {
       let arr = [];
       while (arr.length < len) {
-        arr.push(st);
+        arr.push(st || randomString());
       }
       return arr;
     };
@@ -191,8 +197,8 @@ describe.only("WordSeekPdfFormatter", function() {
         WordSeekPdfFormatter.GRID_MAX_WIDTH
       );
       const testGrid = fillArr(
-        textThatIsJustSmallEnough,
-        WordSeekPdfFormatter.GRID_MAX_HEIGHT
+        WordSeekPdfFormatter.GRID_MAX_HEIGHT,
+        textThatIsJustSmallEnough
       );
 
       let testWords: Array<string> = [];
@@ -219,7 +225,6 @@ describe.only("WordSeekPdfFormatter", function() {
 
     it("grid too tall throws", async () => {
       const testGridTooLarge = fillArr(
-        "X",
         WordSeekPdfFormatter.GRID_MAX_HEIGHT + 1
       );
 
@@ -235,91 +240,52 @@ describe.only("WordSeekPdfFormatter", function() {
       expect(receivedException).to.exist;
     });
 
-    xit("three column word list is added", async () => {
-      //todo check all words added
-      //todo check start position (relative to where grid ended)
-      //todo check columns
-      //todo check spacing
+    it("three column word list is added", async () => {
+      let testWords: Array<string> = fillArr(11);
+      let testGrid: Array<string> = ["ABC", "DEF", "GHI"];
+      const puzzle = new MockPuzzle(testWords, testGrid);
+
+      const pdfBuffer = await testFormatter.format(puzzle);
+
+      // not worried about the particular font or siize for the test
+      // also not worried if diff fonts used between grid and word list
+      expect(listeners["font"]).to.exist;
+      expect(listeners["font"].firstCall).to.exist;
+      expect(listeners["font"].firstCall.args[0]).to.exist;
+
+      expect(listeners["fontSize"]).to.exist;
+      expect(listeners["fontSize"].firstCall).to.exist;
+      expect(listeners["fontSize"].firstCall.args[0]).to.be.at.least(6);
+      expect(listeners["fontSize"].firstCall.args[0]).to.be.at.most(24);
+
+      expect(listeners["text"]).to.exist;
+      expect(listeners["text"].callCount).to.be.at.least(9); // for the grid
+      const textCallsForWords = listeners["text"].getCalls().slice(9);
+
+      // public static readonly WORD_X_START = 999;
+      // public static readonly WORD_X_SPACING = 999;
+      // public static readonly WORD_Y_SPACING = 999;
+
+      const xStart = WordSeekPdfFormatter.WORD_X_START;
+      const yStart =
+        WordSeekPdfFormatter.GRID_START_Y_POS +
+        (testGrid.length - 1) * WordSeekPdfFormatter.GRID_Y_SPACING +
+        WordSeekPdfFormatter.GRID_WORD_Y_SEPARATION;
+
+      const xSpace = WordSeekPdfFormatter.WORD_X_SPACING;
+      const ySpace = WordSeekPdfFormatter.WORD_Y_SPACING;
+
+      expect(textCallsForWords.length).to.equal(testWords.length);
+      for (let callNum = 0; callNum < testWords.length; callNum++) {
+        const expectedX = xStart + (callNum % 3) * xSpace;
+        const expectedY = yStart + Math.floor(callNum / 3) * ySpace;
+
+        expect(textCallsForWords[callNum].args).to.deep.equal([
+          testWords[callNum],
+          expectedX,
+          expectedY
+        ]);
+      }
     });
   });
-
-  // import * as fs from "fs";
-  // import { WordList } from "./src/WordList";
-  // import { WordSeekPuzzle } from "./src/WordSeekPuzzle";
-  // import { WordSeekFinder } from "./src/WordSeekFinder";
-  // import { LetterGrid } from "./src/LetterGrid";
-
-  // const getOutput = (grid: WordSeekPuzzle): string => {
-  //   return grid.getGridLetters().join("\n") + "\n\n" + grid.getWordsOutput();
-  // };
-
-  // const wl = new WordList(readFileAsArray(filename));
-  // let wsGrid = new WordSeekPuzzle(wl, 30, 20);
-  // const solver = new WordSeekFinder(wsGrid.getGrid());
-  // const allPlacements = solver.findWords(wl.getAllWords());
-
-  ///////////////////////////////////////////
-
-  // const doc = new PDFDocument();
-  // doc.pipe(fs.createWriteStream(outputFilename));
-
-  // // Draw the grid
-  // const lines = wsGrid
-  //   .getGridOutput()
-  //   .split("\n")
-  //   .map(line => line.split(""));
-
-  // const horizStart = 50;
-  // const vertStart = 50;
-  // const horizSpacing = 15;
-  // const vertSpacing = 20;
-
-  // const gridText = doc.font("/System/Library/Fonts/NewYork.ttf").fontSize(12);
-  // for (let lineNum = 0; lineNum < lines.length; lineNum++) {
-  //   const line = lines[lineNum];
-  //   for (let charNum = 0; charNum < line.length; charNum++) {
-  //     gridText.text(
-  //       line[charNum],
-  //       horizStart + charNum * horizSpacing,
-  //       vertStart + lineNum * vertSpacing
-  //     );
-  //   }
-  // }
-
-  // const lineStartVert = vertStart + lines.length * vertSpacing;
-
-  // // Draw a line between grid and words
-  // doc
-  //   .moveTo(25, lineStartVert)
-  //   .lineTo(600, lineStartVert)
-  //   .lineTo(600, lineStartVert + 2)
-  //   .lineTo(25, lineStartVert + 2)
-  //   .lineTo(25, lineStartVert)
-  //   .fill("#000000");
-
-  // // List words
-  // const wordText = doc.font("/System/Library/Fonts/NewYork.ttf").fontSize(10);
-  // const words = wl.getAllWordsOriginal();
-  // const wordsPerLine = 3;
-  // const wordLines = Math.ceil(words.length / wordsPerLine);
-
-  // const wordHorizStart = 50;
-  // const wordVertStart = lineStartVert + 25;
-  // const wordHorizSpacing = Math.floor(600 / wordsPerLine);
-  // const wordVertSpacing = 30;
-
-  // for (let wordLine = 0; wordLine < wordLines; wordLine++) {
-  //   for (let wordNum = 0; wordNum < wordsPerLine; wordNum++) {
-  //     const word = words[wordLine * wordsPerLine + wordNum];
-  //     if (word) {
-  //       wordText.text(
-  //         word,
-  //         wordHorizStart + wordNum * wordHorizSpacing,
-  //         wordVertStart + wordLine * wordVertSpacing
-  //       );
-  //     }
-  //   }
-  // }
-
-  // doc.end();
 });
