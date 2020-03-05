@@ -107,6 +107,18 @@ export class WordSeekGrid {
     return currGrid;
   }
 
+  private placeWord(
+    word: string,
+    placement: WordLocation
+  ): WordSeekGrid | undefined {
+    return this.placeWordAt(
+      word,
+      placement.getX(),
+      placement.getY(),
+      placement.getDirection()
+    );
+  }
+
   findRandomPlacement(
     word: string,
     direction: GridDirection
@@ -135,19 +147,6 @@ export class WordSeekGrid {
     } else {
       return this.newFromLetterGrid(this.letterGrid.expandRandom());
     }
-  }
-
-  private placeWord(
-    // todo refactor placeWord and placeWordAt
-    word: string,
-    placement: WordLocation
-  ): WordSeekGrid | undefined {
-    return this.placeWordAt(
-      word,
-      placement.getX(),
-      placement.getY(),
-      placement.getDirection()
-    );
   }
 
   private addWordFixedGrid(word: string): WordSeekGrid {

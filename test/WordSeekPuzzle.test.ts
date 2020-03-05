@@ -32,7 +32,7 @@ describe("WordSeekPuzzle", function() {
     const wg = new WordSeekPuzzle(new WordList([]));
     expect(wg.getWidth()).to.equal(0);
     expect(wg.getHeight()).to.equal(0);
-    expect(wg.getGridOutput()).to.equal("");
+    expect(wg.getGridLetters()).to.deep.equal([]);
     expect(wg.getWordsOutput()).to.equal("");
   });
 
@@ -46,9 +46,11 @@ describe("WordSeekPuzzle", function() {
     expect(wg.getHeight()).to.equal(gridHeight);
     expect(wg.getWordsOutput()).to.equal("");
 
-    const grid = wg.getGridOutput();
-    expect(grid.length).to.equal((gridWidth + "\n".length) * gridHeight - 1);
-    expect(grid.split("\n").length).to.equal(gridHeight);
+    const gridLetters = wg.getGridLetters();
+    expect(gridLetters.length).to.equal(gridHeight);
+    expect(gridLetters.join("\n").length).to.equal(
+      (gridWidth + "\n".length) * gridHeight - 1
+    );
   });
 
   it("one word, is output", () => {
@@ -57,8 +59,8 @@ describe("WordSeekPuzzle", function() {
     const wg = new WordSeekPuzzle(wordList);
     expect(wg.getWordsOutput()).to.equal(testWord);
 
-    expect(wg.getGridOutput().length).to.equal(
-      (wg.getWidth() + "\n".length) * wg.getHeight() - 1
+    expect(wg.getGridLetters().join("").length).to.equal(
+      wg.getWidth() * wg.getHeight()
     );
 
     const grid = wg.getGrid();
@@ -70,7 +72,7 @@ describe("WordSeekPuzzle", function() {
   it("no ? left", () => {
     const wordList = new WordList([getRandomString()]);
     const wg = new WordSeekPuzzle(wordList);
-    expect(wg.getGridOutput()).to.not.have.string("?");
+    expect(wg.getGridLetters().join("")).to.not.have.string("?");
   });
 
   it("word output list is sorted", () => {

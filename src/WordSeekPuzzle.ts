@@ -32,8 +32,8 @@ export class WordSeekPuzzle {
     return this.grid;
   }
 
-  getGridOutput(): string {
-    return this.grid.getLetters().join("\n");
+  getGridLetters(): string[] {
+    return this.grid.getLetters();
   }
 
   getWordsOutput(): string {

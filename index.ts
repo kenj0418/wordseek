@@ -21,7 +21,7 @@ const readFileAsArray = (filename: string): Array<string> => {
 };
 
 const getOutput = (grid: WordSeekPuzzle): string => {
-  return grid.getGridOutput() + "\n\n" + grid.getWordsOutput();
+  return grid.getGridLetters().join("\n") + "\n\n" + grid.getWordsOutput();
 };
 
 const wl = new WordList(readFileAsArray(filename));
