@@ -20,10 +20,6 @@ const readFileAsArray = (filename: string): Array<string> => {
     .filter(word => word.length);
 };
 
-const getOutput = (grid: WordSeekPuzzle): string => {
-  return grid.getGridLetters().join("\n") + "\n\n" + grid.getWordsOutput();
-};
-
 const wl = new WordList(readFileAsArray(filename));
 
 let wsGrid = new WordSeekPuzzle(wl, 30, 20);

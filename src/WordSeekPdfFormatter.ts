@@ -13,7 +13,7 @@ export class WordSeekPdfFormatter {
 
   public static readonly GRID_WORD_Y_SEPARATION = 40;
 
-  public static readonly WORD_X_START = 5;
+  public static readonly WORD_X_START = 40;
   public static readonly WORD_X_SPACING = 200;
   public static readonly WORD_Y_SPACING = 30;
 

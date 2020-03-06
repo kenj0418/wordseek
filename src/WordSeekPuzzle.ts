@@ -37,7 +37,7 @@ export class WordSeekPuzzle {
   }
 
   getWords(): Array<string> {
-    return this.words.getAllWords().sort();
+    return this.words.getAllWordsOriginal().sort();
   }
 
   getWordsOutput(): string {
