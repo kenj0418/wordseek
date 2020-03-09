@@ -2,13 +2,16 @@ import { expect } from "chai";
 import randomString from "random-string";
 import { WordList } from "../src/WordList";
 import { WordSeekPuzzle } from "../src/WordSeekPuzzle";
+import { WordLocationMapping } from "../src/WordSeekFinder";
 import { WordSeekGridPdfFormatter } from "../src/WordSeekGridPdfFormatter";
-import { WordSeekPdfFormatter } from "../src/WordSeekPdfFormatter";
+import { WordSeekSolutionPdfFormatter } from "../src/WordSeekSolutionPdfFormatter";
 import * as pdfkit from "pdfkit";
 import * as sinon from "sinon";
+import { WordLocation } from "../src/WordLocation";
+import { GridDirection } from "../src/GridDirection";
 const PDFDocument = require("pdfkit");
 
-describe("WordSeekPdfFormatter", function() {
+describe.only("WordSeekSolutionPdfFormatter", function() {
   class MockPuzzle extends WordSeekPuzzle {
     readonly mockWords: Array<string>;
     readonly mockLetters: Array<string>;
@@ -33,8 +36,9 @@ describe("WordSeekPdfFormatter", function() {
       let testWords: Array<string> = [];
       let testGrid: Array<string> = [];
       const puzzle = new MockPuzzle(testWords, testGrid);
-      const formatter = new WordSeekPdfFormatter();
-      const pdfBuffer = await formatter.format(puzzle);
+      const formatter = new WordSeekSolutionPdfFormatter();
+      const solutions: WordLocationMapping = {};
+      const pdfBuffer = await formatter.format(puzzle, solutions);
 
       expect(pdfBuffer).to.exist;
       const pdfDoc = new PDFDocument(pdfBuffer);
@@ -47,7 +51,7 @@ describe("WordSeekPdfFormatter", function() {
   describe("with mock pdfkit", function() {
     let listeners: any;
     let mockPdfDoc: any;
-    let testFormatter: WordSeekPdfFormatter;
+    let testFormatter: WordSeekSolutionPdfFormatter;
 
     class MockPdfDocument {
       listeners: any;
@@ -95,9 +99,17 @@ describe("WordSeekPdfFormatter", function() {
       fill(color: number): MockPdfDocument {
         return this.callListener("fill", color);
       }
+
+      path(pathSt: string): MockPdfDocument {
+        return this.callListener("path", pathSt);
+      }
+
+      stroke(): MockPdfDocument {
+        return this.callListener("stroke");
+      }
     }
 
-    class WordSeekPdfFormatterWithMockPdfKit extends WordSeekPdfFormatter {
+    class WordSeekSolutionPdfFormatterWithMockPdfKit extends WordSeekSolutionPdfFormatter {
       readonly mockPdfDoc: any;
 
       constructor(mockPdfDoc: any) {
@@ -113,7 +125,9 @@ describe("WordSeekPdfFormatter", function() {
     beforeEach(() => {
       listeners = {};
       mockPdfDoc = new MockPdfDocument(listeners);
-      testFormatter = new WordSeekPdfFormatterWithMockPdfKit(mockPdfDoc);
+      testFormatter = new WordSeekSolutionPdfFormatterWithMockPdfKit(
+        mockPdfDoc
+      );
     });
 
     it("pdf is properly terminated", async () => {
@@ -121,7 +135,7 @@ describe("WordSeekPdfFormatter", function() {
       let testGrid: Array<string> = [];
       const puzzle = new MockPuzzle(testWords, testGrid);
 
-      const pdfBuffer = await testFormatter.format(puzzle);
+      const pdfBuffer = await testFormatter.format(puzzle, {});
 
       expect(listeners["data"]).to.exist;
       expect(listeners["error"]).to.exist;
@@ -135,7 +149,7 @@ describe("WordSeekPdfFormatter", function() {
       let testGrid: Array<string> = ["AB", "CD"];
       const puzzle = new MockPuzzle(testWords, testGrid);
 
-      const pdfBuffer = await testFormatter.format(puzzle);
+      const pdfBuffer = await testFormatter.format(puzzle, {});
 
       // not worried about the particular font or siize for the test
       // also not worried if diff fonts used between grid and word list
@@ -204,7 +218,7 @@ describe("WordSeekPdfFormatter", function() {
 
       let testWords: Array<string> = [];
       const puzzle = new MockPuzzle(testWords, testGrid);
-      const pdfBuffer = await testFormatter.format(puzzle);
+      const pdfBuffer = await testFormatter.format(puzzle, {});
       expect(listeners["end"].callCount).to.equal(1);
     });
 
@@ -219,7 +233,7 @@ describe("WordSeekPdfFormatter", function() {
 
       let receivedException: Error | undefined;
       try {
-        await testFormatter.format(puzzle);
+        await testFormatter.format(puzzle, {});
       } catch (ex) {
         receivedException = ex;
       }
@@ -236,55 +250,66 @@ describe("WordSeekPdfFormatter", function() {
 
       let receivedException: Error | undefined;
       try {
-        await testFormatter.format(puzzle);
+        await testFormatter.format(puzzle, {});
       } catch (ex) {
         receivedException = ex;
       }
       expect(receivedException).to.exist;
     });
 
-    it("three column word list is added", async () => {
-      let testWords: Array<string> = fillArr(11);
-      let testGrid: Array<string> = ["ABC", "DEF", "GHI"];
+    it("single east solution charted on grid", async () => {
+      let testWord = "AB";
+      let testWords: Array<string> = [testWord];
+      let testGrid: Array<string> = ["AB", "CD"];
       const puzzle = new MockPuzzle(testWords, testGrid);
 
-      const pdfBuffer = await testFormatter.format(puzzle);
+      const solutions = {
+        [testWord]: new WordLocation(0, 0, GridDirection.EAST)
+      };
 
-      // not worried about the particular font or siize for the test
-      // also not worried if diff fonts used between grid and word list
-      expect(listeners["font"]).to.exist;
-      expect(listeners["font"].firstCall).to.exist;
-      expect(listeners["font"].firstCall.args[0]).to.exist;
+      await testFormatter.format(puzzle, solutions);
 
-      expect(listeners["fontSize"]).to.exist;
-      expect(listeners["fontSize"].firstCall).to.exist;
-      expect(listeners["fontSize"].firstCall.args[0]).to.be.at.least(6);
-      expect(listeners["fontSize"].firstCall.args[0]).to.be.at.most(24);
+      expect(listeners["path"]).to.exist;
+      expect(listeners["path"].callCount).to.equal(1);
+      expect(listeners["path"].firstCall.args[0]).to.match(
+        /M .+ .+ L .+ .+ A .+ .+ 0 0 . .+ .+ L .+ .+ A .+ .+ 0 0 . .+ .+/
+      );
 
-      expect(listeners["text"]).to.exist;
-      expect(listeners["text"].callCount).to.be.at.least(9); // for the grid
-      const textCallsForWords = listeners["text"].getCalls().slice(9);
+      //stroke called to draw line
+      expect(listeners["stroke"]).to.exist;
+      expect(listeners["stroke"].callCount).to.equal(1);
+    });
 
-      const xStart = WordSeekPdfFormatter.WORD_X_START;
-      const yStart =
-        WordSeekPdfFormatter.GRID_START_Y_POS +
-        (testGrid.length - 1) * WordSeekPdfFormatter.GRID_Y_SPACING +
-        WordSeekPdfFormatter.GRID_WORD_Y_SEPARATION;
+    it("multiple solutions", async () => {
+      let testWord1 = "AC";
+      let testWord2 = "CB";
+      let testWords: Array<string> = [testWord1, testWord2];
+      let testGrid: Array<string> = ["AB", "CD"];
+      const puzzle = new MockPuzzle(testWords, testGrid);
 
-      const xSpace = WordSeekPdfFormatter.WORD_X_SPACING;
-      const ySpace = WordSeekPdfFormatter.WORD_Y_SPACING;
+      const solutions = {
+        [testWord1]: new WordLocation(0, 0, GridDirection.SOUTH),
+        [testWord2]: new WordLocation(0, 0, GridDirection.NORTHEAST)
+      };
 
-      expect(textCallsForWords.length).to.equal(testWords.length);
-      for (let callNum = 0; callNum < testWords.length; callNum++) {
-        const expectedX = xStart + (callNum % 3) * xSpace;
-        const expectedY = yStart + Math.floor(callNum / 3) * ySpace;
+      await testFormatter.format(puzzle, solutions);
 
-        expect(textCallsForWords[callNum].args).to.deep.equal([
-          testWords[callNum],
-          expectedX,
-          expectedY
-        ]);
-      }
+      expect(listeners["path"]).to.exist;
+      expect(listeners["path"].callCount).to.equal(2);
+      //making sure they are both the right general shape and not the same, not testing the fine graphical details
+      expect(listeners["path"].firstCall.args[0]).to.match(
+        /M .+ .+ L .+ .+ A .+ .+ 0 0 . .+ .+ L .+ .+ A .+ .+ 0 0 . .+ .+/
+      );
+      expect(listeners["path"].secondCall.args[0]).to.match(
+        /M .+ .+ L .+ .+ A .+ .+ 0 0 . .+ .+ L .+ .+ A .+ .+ 0 0 . .+ .+/
+      );
+      expect(listeners["path"].firstCall.args[0]).to.not.equal(
+        listeners["path"].firstCall.args[1]
+      );
+
+      //stroke called to draw line
+      expect(listeners["stroke"]).to.exist;
+      expect(listeners["stroke"].callCount).to.equal(2);
     });
   });
 });

@@ -2,7 +2,7 @@ import { WordSeekGrid } from "./WordSeekGrid";
 import { GridDirection } from "./GridDirection";
 import { WordLocation } from "./WordLocation";
 
-interface WordLocationMapping {
+export interface WordLocationMapping {
   [index: string]: WordLocation | undefined;
 }
 

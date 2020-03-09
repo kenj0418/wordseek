@@ -1,60 +1,15 @@
 import * as pdfkit from "pdfkit";
 const PDFDocument = require("pdfkit");
-import { WordSeekPuzzle } from "../src/WordSeekPuzzle";
+import { WordSeekGridPdfFormatter } from "./WordSeekGridPdfFormatter";
+import { WordSeekPuzzle } from "./WordSeekPuzzle";
 import { LetterGrid } from "./LetterGrid";
 
-export class WordSeekPdfFormatter {
-  public static readonly GRID_START_X_POS = 50;
-  public static readonly GRID_START_Y_POS = 50;
-  public static readonly GRID_X_SPACING = 15;
-  public static readonly GRID_Y_SPACING = 20;
-  public static readonly GRID_MAX_WIDTH = 30;
-  public static readonly GRID_MAX_HEIGHT = 40;
-
+export class WordSeekPdfFormatter extends WordSeekGridPdfFormatter {
   public static readonly GRID_WORD_Y_SEPARATION = 40;
 
   public static readonly WORD_X_START = 40;
   public static readonly WORD_X_SPACING = 200;
   public static readonly WORD_Y_SPACING = 30;
-
-  protected createPdfDoc(): any {
-    return new PDFDocument();
-  }
-
-  private displayLetterGrid(doc: any, gridLines: Array<string>): number {
-    const gridText = doc.font("/System/Library/Fonts/NewYork.ttf").fontSize(12);
-
-    if (gridLines.length > WordSeekPdfFormatter.GRID_MAX_HEIGHT) {
-      throw new Error(
-        `Grid is too tall (height=${gridLines.length}) for this formatter.  Max height: ${WordSeekPdfFormatter.GRID_MAX_HEIGHT}`
-      );
-    }
-
-    let yPos = 0;
-
-    for (let lineNum = 0; lineNum < gridLines.length; lineNum++) {
-      yPos =
-        WordSeekPdfFormatter.GRID_START_Y_POS +
-        lineNum * WordSeekPdfFormatter.GRID_Y_SPACING;
-      const line = gridLines[lineNum];
-      if (line.length > WordSeekPdfFormatter.GRID_MAX_WIDTH) {
-        throw new Error(
-          `Grid is too wide (width=${line.length}) for this formatter.  Max width: ${WordSeekPdfFormatter.GRID_MAX_WIDTH}`
-        );
-      }
-
-      for (let charNum = 0; charNum < line.length; charNum++) {
-        gridText.text(
-          line[charNum],
-          WordSeekPdfFormatter.GRID_START_X_POS +
-            charNum * WordSeekPdfFormatter.GRID_X_SPACING,
-          yPos
-        );
-      }
-    }
-
-    return yPos;
-  }
 
   private drawLine(doc: any, gridEndYPos: number): void {
     const lineStartVert =
